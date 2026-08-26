@@ -1,0 +1,30 @@
+import { Router } from "express";
+
+import { createPayment, getPayments, getPaymentByOrder } from "../controllers/payment.controller";
+
+import { authenticateToken } from "../middlewares/auth.middleware";
+import { authorizeRoles } from "../middlewares/role.middleware";
+
+const router = Router();
+
+router.post(
+  "/",
+  authenticateToken,
+  authorizeRoles("Admin", "Cashier"),
+  createPayment
+);
+
+router.get(
+  "/",
+  authenticateToken,
+  authorizeRoles("Admin", "Cashier"),
+  getPayments
+);
+
+router.get(
+  "/order/:order_id",
+  authenticateToken,
+  authorizeRoles("Admin", "Cashier"),
+  getPaymentByOrder
+);
+export default router;
