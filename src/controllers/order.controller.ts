@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/prisma";
 import { successResponse, errorResponse } from "../utils/response";
+import { AuthRequest } from "../middlewares/auth.middleware";
 
 interface OrderItemInput {
   service_id: number;
@@ -709,6 +710,194 @@ export const deleteOrder = async (
     });
 
     return successResponse(res, null, "Order deleted successfully");
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createOrderByCustomer = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user) {
+      return errorResponse(res, "Unauthorized", 401);
+    }
+
+    if (req.user.role !== "Customer") {
+      return errorResponse(res, "Only customer can access this endpoint", 403);
+    }
+
+    const { vehicle_id, items } = req.body;
+
+    if (!vehicle_id || !Array.isArray(items) || items.length === 0) {
+      return errorResponse(res, "Vehicle and services are required", 400);
+    }
+
+    const customer = await prisma.customers.findUnique({
+      where: {
+        user_id: req.user.id,
+      },
+    });
+
+    if (!customer) {
+      return errorResponse(res, "Customer profile not found", 404);
+    }
+
+    const vehicle = await prisma.vehicles.findUnique({
+      where: {
+        id: Number(vehicle_id),
+      },
+    });
+
+    if (!vehicle) {
+      return errorResponse(res, "Vehicle not found", 404);
+    }
+
+    if (vehicle.customer_id !== customer.id) {
+      return errorResponse(res, "Vehicle does not belong to you", 403);
+    }
+
+    const serviceIds = [
+      ...new Set(
+        items.map((item: { service_id: number }) => Number(item.service_id)),
+      ),
+    ];
+
+    const services = await prisma.services.findMany({
+      where: {
+        id: { in: serviceIds },
+        deleted_at: null,
+        status: "Active",
+      },
+    });
+
+    if (services.length !== serviceIds.length) {
+      return errorResponse(
+        res,
+        "One or more services not found or inactive",
+        404,
+      );
+    }
+
+    for (const item of items) {
+      const qty = Number(item.qty);
+
+      if (!Number.isInteger(qty) || qty <= 0) {
+        return errorResponse(
+          res,
+          "Service quantity must be greater than 0",
+          400,
+        );
+      }
+    }
+
+    const orderItems = items.map(
+      (item: { service_id: number; qty: number }) => {
+        const service = services.find((s) => s.id === Number(item.service_id))!;
+        const qty = Number(item.qty);
+
+        return {
+          service_id: Number(item.service_id),
+          qty,
+          subtotal: Number(service.price) * qty,
+        };
+      },
+    );
+
+    const order = await prisma.$transaction(async (tx) => {
+      return tx.orders.create({
+        data: {
+          customer_id: customer.id,
+          vehicle_id: Number(vehicle_id),
+          staff_id: null,
+          service_status: "Waiting",
+          payment_status: "Unpaid",
+          check_in_time: null,
+          order_items: {
+            create: orderItems,
+          },
+        },
+        include: {
+          customers: {
+            select: {
+              id: true,
+              name: true,
+              phone: true,
+            },
+          },
+          vehicles: true,
+          order_items: {
+            include: {
+              services: {
+                select: {
+                  id: true,
+                  name: true,
+                  price: true,
+                  duration: true,
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
+    return successResponse(res, order, "Order created successfully", 201);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getMyOrders = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user) {
+      return errorResponse(res, "Unauthorized", 401);
+    }
+
+    if (req.user.role !== "Customer") {
+      return errorResponse(res, "Only customer can access this endpoint", 403);
+    }
+
+    const customer = await prisma.customers.findUnique({
+      where: { user_id: req.user.id },
+    });
+
+    if (!customer) {
+      return errorResponse(res, "Customer profile not found", 404);
+    }
+
+    const orders = await prisma.orders.findMany({
+      where: {
+        customer_id: customer.id,
+      },
+      orderBy: {
+        id: "desc",
+      },
+      include: {
+        vehicles: true,
+        order_items: {
+          include: {
+            services: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+                duration: true,
+              },
+            },
+          },
+        },
+        invoices: true,
+      },
+    });
+
+    return successResponse(res, orders, "My orders retrieved successfully");
   } catch (err) {
     next(err);
   }

@@ -53,8 +53,8 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   users: 'users',
   customers: 'customers',
-  vehicles: 'vehicles',
   staffs: 'staffs',
+  vehicles: 'vehicles',
   services: 'services',
   orders: 'orders',
   order_items: 'order_items',
@@ -92,6 +92,7 @@ export type UsersScalarFieldEnum = (typeof UsersScalarFieldEnum)[keyof typeof Us
 
 export const CustomersScalarFieldEnum = {
   id: 'id',
+  user_id: 'user_id',
   name: 'name',
   phone: 'phone',
   created_at: 'created_at',
@@ -100,6 +101,20 @@ export const CustomersScalarFieldEnum = {
 } as const
 
 export type CustomersScalarFieldEnum = (typeof CustomersScalarFieldEnum)[keyof typeof CustomersScalarFieldEnum]
+
+
+export const StaffsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  name: 'name',
+  phone: 'phone',
+  status: 'status',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  deleted_at: 'deleted_at'
+} as const
+
+export type StaffsScalarFieldEnum = (typeof StaffsScalarFieldEnum)[keyof typeof StaffsScalarFieldEnum]
 
 
 export const VehiclesScalarFieldEnum = {
@@ -114,19 +129,6 @@ export const VehiclesScalarFieldEnum = {
 } as const
 
 export type VehiclesScalarFieldEnum = (typeof VehiclesScalarFieldEnum)[keyof typeof VehiclesScalarFieldEnum]
-
-
-export const StaffsScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  phone: 'phone',
-  status: 'status',
-  created_at: 'created_at',
-  updated_at: 'updated_at',
-  deleted_at: 'deleted_at'
-} as const
-
-export type StaffsScalarFieldEnum = (typeof StaffsScalarFieldEnum)[keyof typeof StaffsScalarFieldEnum]
 
 
 export const ServicesScalarFieldEnum = {

@@ -7,11 +7,37 @@ import {
   updateVehicle,
   restoreVehicle,
   deleteVehicle,
+  getMyVehicles,
+  createVehicleByCustomer,
+  updateVehicleByCustomer,
+  deleteVehicleByCustomer,
 } from "../controllers/vehicle.controller";
 import { authenticateToken } from "../middlewares/auth.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 
 const router = Router();
+
+router.get("/my", authenticateToken, authorizeRoles("Customer"), getMyVehicles);
+router.post(
+  "/my",
+  authenticateToken,
+  authorizeRoles("Customer"),
+  createVehicleByCustomer,
+);
+
+router.put(
+  "/my/:id",
+  authenticateToken,
+  authorizeRoles("Customer"),
+  updateVehicleByCustomer,
+);
+
+router.delete(
+  "/my/:id",
+  authenticateToken,
+  authorizeRoles("Customer"),
+  deleteVehicleByCustomer,
+);
 
 router.get(
   "/",

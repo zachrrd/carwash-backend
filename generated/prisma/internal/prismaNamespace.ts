@@ -399,8 +399,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   users: 'users',
   customers: 'customers',
-  vehicles: 'vehicles',
   staffs: 'staffs',
+  vehicles: 'vehicles',
   services: 'services',
   orders: 'orders',
   order_items: 'order_items',
@@ -421,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "customers" | "vehicles" | "staffs" | "services" | "orders" | "order_items" | "payments" | "invoices"
+    modelProps: "users" | "customers" | "staffs" | "vehicles" | "services" | "orders" | "order_items" | "payments" | "invoices"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -573,80 +573,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    vehicles: {
-      payload: Prisma.$vehiclesPayload<ExtArgs>
-      fields: Prisma.vehiclesFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.vehiclesFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.vehiclesFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>
-        }
-        findFirst: {
-          args: Prisma.vehiclesFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.vehiclesFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>
-        }
-        findMany: {
-          args: Prisma.vehiclesFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>[]
-        }
-        create: {
-          args: Prisma.vehiclesCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>
-        }
-        createMany: {
-          args: Prisma.vehiclesCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.vehiclesCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>[]
-        }
-        delete: {
-          args: Prisma.vehiclesDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>
-        }
-        update: {
-          args: Prisma.vehiclesUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>
-        }
-        deleteMany: {
-          args: Prisma.vehiclesDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.vehiclesUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.vehiclesUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>[]
-        }
-        upsert: {
-          args: Prisma.vehiclesUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>
-        }
-        aggregate: {
-          args: Prisma.VehiclesAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateVehicles>
-        }
-        groupBy: {
-          args: Prisma.vehiclesGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.VehiclesGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.vehiclesCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.VehiclesCountAggregateOutputType> | number
-        }
-      }
-    }
     staffs: {
       payload: Prisma.$staffsPayload<ExtArgs>
       fields: Prisma.staffsFieldRefs
@@ -718,6 +644,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.staffsCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.StaffsCountAggregateOutputType> | number
+        }
+      }
+    }
+    vehicles: {
+      payload: Prisma.$vehiclesPayload<ExtArgs>
+      fields: Prisma.vehiclesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.vehiclesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.vehiclesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>
+        }
+        findFirst: {
+          args: Prisma.vehiclesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.vehiclesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>
+        }
+        findMany: {
+          args: Prisma.vehiclesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>[]
+        }
+        create: {
+          args: Prisma.vehiclesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>
+        }
+        createMany: {
+          args: Prisma.vehiclesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.vehiclesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>[]
+        }
+        delete: {
+          args: Prisma.vehiclesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>
+        }
+        update: {
+          args: Prisma.vehiclesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>
+        }
+        deleteMany: {
+          args: Prisma.vehiclesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.vehiclesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.vehiclesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>[]
+        }
+        upsert: {
+          args: Prisma.vehiclesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$vehiclesPayload>
+        }
+        aggregate: {
+          args: Prisma.VehiclesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVehicles>
+        }
+        groupBy: {
+          args: Prisma.vehiclesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VehiclesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.vehiclesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VehiclesCountAggregateOutputType> | number
         }
       }
     }
@@ -1144,6 +1144,7 @@ export type UsersScalarFieldEnum = (typeof UsersScalarFieldEnum)[keyof typeof Us
 
 export const CustomersScalarFieldEnum = {
   id: 'id',
+  user_id: 'user_id',
   name: 'name',
   phone: 'phone',
   created_at: 'created_at',
@@ -1152,6 +1153,20 @@ export const CustomersScalarFieldEnum = {
 } as const
 
 export type CustomersScalarFieldEnum = (typeof CustomersScalarFieldEnum)[keyof typeof CustomersScalarFieldEnum]
+
+
+export const StaffsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  name: 'name',
+  phone: 'phone',
+  status: 'status',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  deleted_at: 'deleted_at'
+} as const
+
+export type StaffsScalarFieldEnum = (typeof StaffsScalarFieldEnum)[keyof typeof StaffsScalarFieldEnum]
 
 
 export const VehiclesScalarFieldEnum = {
@@ -1166,19 +1181,6 @@ export const VehiclesScalarFieldEnum = {
 } as const
 
 export type VehiclesScalarFieldEnum = (typeof VehiclesScalarFieldEnum)[keyof typeof VehiclesScalarFieldEnum]
-
-
-export const StaffsScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  phone: 'phone',
-  status: 'status',
-  created_at: 'created_at',
-  updated_at: 'updated_at',
-  deleted_at: 'deleted_at'
-} as const
-
-export type StaffsScalarFieldEnum = (typeof StaffsScalarFieldEnum)[keyof typeof StaffsScalarFieldEnum]
 
 
 export const ServicesScalarFieldEnum = {
@@ -1495,8 +1497,8 @@ export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaC
 export type GlobalOmitConfig = {
   users?: Prisma.usersOmit
   customers?: Prisma.customersOmit
-  vehicles?: Prisma.vehiclesOmit
   staffs?: Prisma.staffsOmit
+  vehicles?: Prisma.vehiclesOmit
   services?: Prisma.servicesOmit
   orders?: Prisma.ordersOmit
   order_items?: Prisma.order_itemsOmit

@@ -7,28 +7,56 @@ datasource db {
   provider = "postgresql"
 }
 
+
+
 model users {
   id        Int      @id @default(autoincrement())
   name      String   @db.VarChar(255)
   email     String   @unique @db.VarChar(255)
   password  String   @db.VarChar(255)
-  role      String   @default("Cashier") @db.VarChar(50)
+  role      String   @default("Customer") @db.VarChar(50) 
   createdAt DateTime @default(now()) @map("created_at")
+
+  customer  customers?
+  staff     staffs?
 
   @@map("users")
 }
 
+
 model customers {
   id         Int       @id @default(autoincrement())
+  user_id    Int?      @unique 
   name       String    @db.VarChar(255)
   phone      String?   @db.VarChar(50)
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now()) @updatedAt
   deleted_at DateTime?
 
-  vehicles vehicles[]
-  orders   orders[]
+  user       users?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  vehicles   vehicles[]
+  orders     orders[]
+
+  @@index([deleted_at])
 }
+
+
+model staffs {
+  id         Int       @id @default(autoincrement())
+  user_id    Int?      @unique 
+  name       String    @db.VarChar(255)
+  phone      String?   @db.VarChar(50)
+  status     String?   @default("Active") @db.VarChar(50)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
+  deleted_at DateTime?
+
+  user       users?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  orders     orders[]
+
+  @@index([deleted_at])
+}
+
 
 model vehicles {
   id           Int       @id @default(autoincrement())
@@ -47,20 +75,6 @@ model vehicles {
   @@index([deleted_at])
 }
 
-model staffs {
-  id         Int       @id @default(autoincrement())
-  name       String    @db.VarChar(255)
-  phone      String?   @db.VarChar(50)
-  status     String?   @default("Active") @db.VarChar(50)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @default(now()) @updatedAt
-  deleted_at DateTime?
-
-  orders orders[]
-
-  @@index([deleted_at])
-}
-
 model services {
   id         Int       @id @default(autoincrement())
   name       String    @db.VarChar(255)
@@ -75,6 +89,7 @@ model services {
 
   @@index([deleted_at])
 }
+
 
 model orders {
   id             Int       @id @default(autoincrement())
@@ -100,6 +115,7 @@ model orders {
   @@index([payment_status])
 }
 
+
 model order_items {
   id         Int     @id @default(autoincrement())
   order_id   Int
@@ -114,6 +130,7 @@ model order_items {
   @@index([service_id])
 }
 
+
 model payments {
   id              Int       @id @default(autoincrement())
   order_id        Int
@@ -126,6 +143,7 @@ model payments {
 
   @@index([order_id])
 }
+
 
 model invoices {
   id           Int       @id @default(autoincrement())

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/prisma";
 import { successResponse, errorResponse } from "../utils/response";
+import { AuthRequest } from "../middlewares/auth.middleware";
 
 export const getAllVehicles = async (
   req: Request,
@@ -280,6 +281,205 @@ export const getDeletedVehicles = async (
     });
 
     return successResponse(res, vehicles, "Deleted vehicles retrieved");
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getMyVehicles = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user) {
+      return errorResponse(res, "Unauthorized", 401);
+    }
+    if (req.user.role !== "Customer") {
+      return errorResponse(res, "Only customer can access this endpoint", 403);
+    }
+    const customer = await prisma.customers.findUnique({
+      where: { user_id: req.user.id },
+    });
+    if (!customer) {
+      return errorResponse(res, "Customer profile not found", 404);
+    }
+
+    const vehicles = await prisma.vehicles.findMany({
+      where: {
+        customer_id: customer.id,
+        deleted_at: null,
+      },
+      orderBy: {
+        id: "asc",
+      },
+    });
+    return successResponse(res, vehicles, "My vehicles retrieved successfully");
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createVehicleByCustomer = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user) {
+      return errorResponse(res, "Unauthorized", 401);
+    }
+
+    if (req.user.role !== "Customer") {
+      return errorResponse(res, "Only customer can access his endpoint", 403);
+    }
+
+    const customer = await prisma.customers.findUnique({
+      where: { user_id: req.user.id },
+    });
+
+    if (!customer) {
+      return errorResponse(res, "Customer profile not found", 404);
+    }
+
+    const { plate_number, brand, model } = req.body;
+
+    if (!plate_number || !brand || !model) {
+      return errorResponse(res, "All fields are required", 400);
+    }
+
+    const vehicle = await prisma.vehicles.create({
+      data: {
+        plate_number,
+        brand,
+        model,
+        customer_id: customer.id,
+      },
+    });
+
+    return successResponse(res, vehicle, "Vehicle created successfully", 201);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateVehicleByCustomer = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user) {
+      return errorResponse(res, "Unauthorized", 401);
+    }
+
+    if (req.user.role !== "Customer") {
+      return errorResponse(res, "Only customer can access this endpoint", 403);
+    }
+
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      return errorResponse(res, "Invalid vehicle id", 400);
+    }
+
+    const customer = await prisma.customers.findUnique({
+      where: {
+        user_id: req.user.id,
+      },
+    });
+
+    if (!customer) {
+      return errorResponse(res, "Customer profile not found", 404);
+    }
+
+    const existingVehicle = await prisma.vehicles.findFirst({
+      where: {
+        id,
+        customer_id: customer.id,
+        deleted_at: null,
+      },
+    });
+
+    if (!existingVehicle) {
+      return errorResponse(res, "Vehicle not found", 404);
+    }
+
+    const { plate_number, brand, model } = req.body;
+
+    if (!plate_number || !brand || !model) {
+      return errorResponse(res, "All fields are required", 400);
+    }
+
+    const vehicle = await prisma.vehicles.update({
+      where: {
+        id,
+      },
+      data: {
+        plate_number,
+        brand,
+        model,
+      },
+    });
+
+    return successResponse(res, vehicle, "Vehicle updated successfully");
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteVehicleByCustomer = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user) {
+      return errorResponse(res, "Unauthorized", 401);
+    }
+
+    if (req.user.role !== "Customer") {
+      return errorResponse(res, "Only customer can access this endpoint", 403);
+    }
+
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      return errorResponse(res, "Invalid vehicle id", 400);
+    }
+
+    const customer = await prisma.customers.findUnique({
+      where: {
+        user_id: req.user.id,
+      },
+    });
+
+    if (!customer) {
+      return errorResponse(res, "Customer profile not found", 404);
+    }
+
+    const existingVehicle = await prisma.vehicles.findFirst({
+      where: {
+        id,
+        customer_id: customer.id,
+        deleted_at: null,
+      },
+    });
+
+    if (!existingVehicle) {
+      return errorResponse(res, "Vehicle not found", 404);
+    }
+
+    await prisma.vehicles.update({
+      where: {
+        id,
+      },
+      data: {
+        deleted_at: new Date(),
+      },
+    });
+
+    return successResponse(res, null, "Vehicle deleted successfully");
   } catch (err) {
     next(err);
   }

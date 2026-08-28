@@ -514,48 +514,6 @@ export type ordersUncheckedUpdateManyWithoutCustomersNestedInput = {
   deleteMany?: Prisma.ordersScalarWhereInput | Prisma.ordersScalarWhereInput[]
 }
 
-export type ordersCreateNestedManyWithoutVehiclesInput = {
-  create?: Prisma.XOR<Prisma.ordersCreateWithoutVehiclesInput, Prisma.ordersUncheckedCreateWithoutVehiclesInput> | Prisma.ordersCreateWithoutVehiclesInput[] | Prisma.ordersUncheckedCreateWithoutVehiclesInput[]
-  connectOrCreate?: Prisma.ordersCreateOrConnectWithoutVehiclesInput | Prisma.ordersCreateOrConnectWithoutVehiclesInput[]
-  createMany?: Prisma.ordersCreateManyVehiclesInputEnvelope
-  connect?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
-}
-
-export type ordersUncheckedCreateNestedManyWithoutVehiclesInput = {
-  create?: Prisma.XOR<Prisma.ordersCreateWithoutVehiclesInput, Prisma.ordersUncheckedCreateWithoutVehiclesInput> | Prisma.ordersCreateWithoutVehiclesInput[] | Prisma.ordersUncheckedCreateWithoutVehiclesInput[]
-  connectOrCreate?: Prisma.ordersCreateOrConnectWithoutVehiclesInput | Prisma.ordersCreateOrConnectWithoutVehiclesInput[]
-  createMany?: Prisma.ordersCreateManyVehiclesInputEnvelope
-  connect?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
-}
-
-export type ordersUpdateManyWithoutVehiclesNestedInput = {
-  create?: Prisma.XOR<Prisma.ordersCreateWithoutVehiclesInput, Prisma.ordersUncheckedCreateWithoutVehiclesInput> | Prisma.ordersCreateWithoutVehiclesInput[] | Prisma.ordersUncheckedCreateWithoutVehiclesInput[]
-  connectOrCreate?: Prisma.ordersCreateOrConnectWithoutVehiclesInput | Prisma.ordersCreateOrConnectWithoutVehiclesInput[]
-  upsert?: Prisma.ordersUpsertWithWhereUniqueWithoutVehiclesInput | Prisma.ordersUpsertWithWhereUniqueWithoutVehiclesInput[]
-  createMany?: Prisma.ordersCreateManyVehiclesInputEnvelope
-  set?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
-  disconnect?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
-  delete?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
-  connect?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
-  update?: Prisma.ordersUpdateWithWhereUniqueWithoutVehiclesInput | Prisma.ordersUpdateWithWhereUniqueWithoutVehiclesInput[]
-  updateMany?: Prisma.ordersUpdateManyWithWhereWithoutVehiclesInput | Prisma.ordersUpdateManyWithWhereWithoutVehiclesInput[]
-  deleteMany?: Prisma.ordersScalarWhereInput | Prisma.ordersScalarWhereInput[]
-}
-
-export type ordersUncheckedUpdateManyWithoutVehiclesNestedInput = {
-  create?: Prisma.XOR<Prisma.ordersCreateWithoutVehiclesInput, Prisma.ordersUncheckedCreateWithoutVehiclesInput> | Prisma.ordersCreateWithoutVehiclesInput[] | Prisma.ordersUncheckedCreateWithoutVehiclesInput[]
-  connectOrCreate?: Prisma.ordersCreateOrConnectWithoutVehiclesInput | Prisma.ordersCreateOrConnectWithoutVehiclesInput[]
-  upsert?: Prisma.ordersUpsertWithWhereUniqueWithoutVehiclesInput | Prisma.ordersUpsertWithWhereUniqueWithoutVehiclesInput[]
-  createMany?: Prisma.ordersCreateManyVehiclesInputEnvelope
-  set?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
-  disconnect?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
-  delete?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
-  connect?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
-  update?: Prisma.ordersUpdateWithWhereUniqueWithoutVehiclesInput | Prisma.ordersUpdateWithWhereUniqueWithoutVehiclesInput[]
-  updateMany?: Prisma.ordersUpdateManyWithWhereWithoutVehiclesInput | Prisma.ordersUpdateManyWithWhereWithoutVehiclesInput[]
-  deleteMany?: Prisma.ordersScalarWhereInput | Prisma.ordersScalarWhereInput[]
-}
-
 export type ordersCreateNestedManyWithoutStaffsInput = {
   create?: Prisma.XOR<Prisma.ordersCreateWithoutStaffsInput, Prisma.ordersUncheckedCreateWithoutStaffsInput> | Prisma.ordersCreateWithoutStaffsInput[] | Prisma.ordersUncheckedCreateWithoutStaffsInput[]
   connectOrCreate?: Prisma.ordersCreateOrConnectWithoutStaffsInput | Prisma.ordersCreateOrConnectWithoutStaffsInput[]
@@ -598,12 +556,46 @@ export type ordersUncheckedUpdateManyWithoutStaffsNestedInput = {
   deleteMany?: Prisma.ordersScalarWhereInput | Prisma.ordersScalarWhereInput[]
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
+export type ordersCreateNestedManyWithoutVehiclesInput = {
+  create?: Prisma.XOR<Prisma.ordersCreateWithoutVehiclesInput, Prisma.ordersUncheckedCreateWithoutVehiclesInput> | Prisma.ordersCreateWithoutVehiclesInput[] | Prisma.ordersUncheckedCreateWithoutVehiclesInput[]
+  connectOrCreate?: Prisma.ordersCreateOrConnectWithoutVehiclesInput | Prisma.ordersCreateOrConnectWithoutVehiclesInput[]
+  createMany?: Prisma.ordersCreateManyVehiclesInputEnvelope
+  connect?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
+}
+
+export type ordersUncheckedCreateNestedManyWithoutVehiclesInput = {
+  create?: Prisma.XOR<Prisma.ordersCreateWithoutVehiclesInput, Prisma.ordersUncheckedCreateWithoutVehiclesInput> | Prisma.ordersCreateWithoutVehiclesInput[] | Prisma.ordersUncheckedCreateWithoutVehiclesInput[]
+  connectOrCreate?: Prisma.ordersCreateOrConnectWithoutVehiclesInput | Prisma.ordersCreateOrConnectWithoutVehiclesInput[]
+  createMany?: Prisma.ordersCreateManyVehiclesInputEnvelope
+  connect?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
+}
+
+export type ordersUpdateManyWithoutVehiclesNestedInput = {
+  create?: Prisma.XOR<Prisma.ordersCreateWithoutVehiclesInput, Prisma.ordersUncheckedCreateWithoutVehiclesInput> | Prisma.ordersCreateWithoutVehiclesInput[] | Prisma.ordersUncheckedCreateWithoutVehiclesInput[]
+  connectOrCreate?: Prisma.ordersCreateOrConnectWithoutVehiclesInput | Prisma.ordersCreateOrConnectWithoutVehiclesInput[]
+  upsert?: Prisma.ordersUpsertWithWhereUniqueWithoutVehiclesInput | Prisma.ordersUpsertWithWhereUniqueWithoutVehiclesInput[]
+  createMany?: Prisma.ordersCreateManyVehiclesInputEnvelope
+  set?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
+  disconnect?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
+  delete?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
+  connect?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
+  update?: Prisma.ordersUpdateWithWhereUniqueWithoutVehiclesInput | Prisma.ordersUpdateWithWhereUniqueWithoutVehiclesInput[]
+  updateMany?: Prisma.ordersUpdateManyWithWhereWithoutVehiclesInput | Prisma.ordersUpdateManyWithWhereWithoutVehiclesInput[]
+  deleteMany?: Prisma.ordersScalarWhereInput | Prisma.ordersScalarWhereInput[]
+}
+
+export type ordersUncheckedUpdateManyWithoutVehiclesNestedInput = {
+  create?: Prisma.XOR<Prisma.ordersCreateWithoutVehiclesInput, Prisma.ordersUncheckedCreateWithoutVehiclesInput> | Prisma.ordersCreateWithoutVehiclesInput[] | Prisma.ordersUncheckedCreateWithoutVehiclesInput[]
+  connectOrCreate?: Prisma.ordersCreateOrConnectWithoutVehiclesInput | Prisma.ordersCreateOrConnectWithoutVehiclesInput[]
+  upsert?: Prisma.ordersUpsertWithWhereUniqueWithoutVehiclesInput | Prisma.ordersUpsertWithWhereUniqueWithoutVehiclesInput[]
+  createMany?: Prisma.ordersCreateManyVehiclesInputEnvelope
+  set?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
+  disconnect?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
+  delete?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
+  connect?: Prisma.ordersWhereUniqueInput | Prisma.ordersWhereUniqueInput[]
+  update?: Prisma.ordersUpdateWithWhereUniqueWithoutVehiclesInput | Prisma.ordersUpdateWithWhereUniqueWithoutVehiclesInput[]
+  updateMany?: Prisma.ordersUpdateManyWithWhereWithoutVehiclesInput | Prisma.ordersUpdateManyWithWhereWithoutVehiclesInput[]
+  deleteMany?: Prisma.ordersScalarWhereInput | Prisma.ordersScalarWhereInput[]
 }
 
 export type ordersCreateNestedOneWithoutOrder_itemsInput = {
@@ -713,57 +705,6 @@ export type ordersScalarWhereInput = {
   check_in_time?: Prisma.StringNullableFilter<"orders"> | string | null
 }
 
-export type ordersCreateWithoutVehiclesInput = {
-  order_date?: Date | string | null
-  service_status?: string | null
-  payment_status?: string | null
-  check_in_time?: string | null
-  customers: Prisma.customersCreateNestedOneWithoutOrdersInput
-  staffs?: Prisma.staffsCreateNestedOneWithoutOrdersInput
-  order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
-  payments?: Prisma.paymentsCreateNestedManyWithoutOrdersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutOrdersInput
-}
-
-export type ordersUncheckedCreateWithoutVehiclesInput = {
-  id?: number
-  order_date?: Date | string | null
-  service_status?: string | null
-  payment_status?: string | null
-  customer_id: number
-  staff_id?: number | null
-  check_in_time?: string | null
-  order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
-  payments?: Prisma.paymentsUncheckedCreateNestedManyWithoutOrdersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutOrdersInput
-}
-
-export type ordersCreateOrConnectWithoutVehiclesInput = {
-  where: Prisma.ordersWhereUniqueInput
-  create: Prisma.XOR<Prisma.ordersCreateWithoutVehiclesInput, Prisma.ordersUncheckedCreateWithoutVehiclesInput>
-}
-
-export type ordersCreateManyVehiclesInputEnvelope = {
-  data: Prisma.ordersCreateManyVehiclesInput | Prisma.ordersCreateManyVehiclesInput[]
-  skipDuplicates?: boolean
-}
-
-export type ordersUpsertWithWhereUniqueWithoutVehiclesInput = {
-  where: Prisma.ordersWhereUniqueInput
-  update: Prisma.XOR<Prisma.ordersUpdateWithoutVehiclesInput, Prisma.ordersUncheckedUpdateWithoutVehiclesInput>
-  create: Prisma.XOR<Prisma.ordersCreateWithoutVehiclesInput, Prisma.ordersUncheckedCreateWithoutVehiclesInput>
-}
-
-export type ordersUpdateWithWhereUniqueWithoutVehiclesInput = {
-  where: Prisma.ordersWhereUniqueInput
-  data: Prisma.XOR<Prisma.ordersUpdateWithoutVehiclesInput, Prisma.ordersUncheckedUpdateWithoutVehiclesInput>
-}
-
-export type ordersUpdateManyWithWhereWithoutVehiclesInput = {
-  where: Prisma.ordersScalarWhereInput
-  data: Prisma.XOR<Prisma.ordersUpdateManyMutationInput, Prisma.ordersUncheckedUpdateManyWithoutVehiclesInput>
-}
-
 export type ordersCreateWithoutStaffsInput = {
   order_date?: Date | string | null
   service_status?: string | null
@@ -813,6 +754,57 @@ export type ordersUpdateWithWhereUniqueWithoutStaffsInput = {
 export type ordersUpdateManyWithWhereWithoutStaffsInput = {
   where: Prisma.ordersScalarWhereInput
   data: Prisma.XOR<Prisma.ordersUpdateManyMutationInput, Prisma.ordersUncheckedUpdateManyWithoutStaffsInput>
+}
+
+export type ordersCreateWithoutVehiclesInput = {
+  order_date?: Date | string | null
+  service_status?: string | null
+  payment_status?: string | null
+  check_in_time?: string | null
+  customers: Prisma.customersCreateNestedOneWithoutOrdersInput
+  staffs?: Prisma.staffsCreateNestedOneWithoutOrdersInput
+  order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
+  payments?: Prisma.paymentsCreateNestedManyWithoutOrdersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutOrdersInput
+}
+
+export type ordersUncheckedCreateWithoutVehiclesInput = {
+  id?: number
+  order_date?: Date | string | null
+  service_status?: string | null
+  payment_status?: string | null
+  customer_id: number
+  staff_id?: number | null
+  check_in_time?: string | null
+  order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
+  payments?: Prisma.paymentsUncheckedCreateNestedManyWithoutOrdersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutOrdersInput
+}
+
+export type ordersCreateOrConnectWithoutVehiclesInput = {
+  where: Prisma.ordersWhereUniqueInput
+  create: Prisma.XOR<Prisma.ordersCreateWithoutVehiclesInput, Prisma.ordersUncheckedCreateWithoutVehiclesInput>
+}
+
+export type ordersCreateManyVehiclesInputEnvelope = {
+  data: Prisma.ordersCreateManyVehiclesInput | Prisma.ordersCreateManyVehiclesInput[]
+  skipDuplicates?: boolean
+}
+
+export type ordersUpsertWithWhereUniqueWithoutVehiclesInput = {
+  where: Prisma.ordersWhereUniqueInput
+  update: Prisma.XOR<Prisma.ordersUpdateWithoutVehiclesInput, Prisma.ordersUncheckedUpdateWithoutVehiclesInput>
+  create: Prisma.XOR<Prisma.ordersCreateWithoutVehiclesInput, Prisma.ordersUncheckedCreateWithoutVehiclesInput>
+}
+
+export type ordersUpdateWithWhereUniqueWithoutVehiclesInput = {
+  where: Prisma.ordersWhereUniqueInput
+  data: Prisma.XOR<Prisma.ordersUpdateWithoutVehiclesInput, Prisma.ordersUncheckedUpdateWithoutVehiclesInput>
+}
+
+export type ordersUpdateManyWithWhereWithoutVehiclesInput = {
+  where: Prisma.ordersScalarWhereInput
+  data: Prisma.XOR<Prisma.ordersUpdateManyMutationInput, Prisma.ordersUncheckedUpdateManyWithoutVehiclesInput>
 }
 
 export type ordersCreateWithoutOrder_itemsInput = {
@@ -1058,51 +1050,6 @@ export type ordersUncheckedUpdateManyWithoutCustomersInput = {
   check_in_time?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
-export type ordersCreateManyVehiclesInput = {
-  id?: number
-  order_date?: Date | string | null
-  service_status?: string | null
-  payment_status?: string | null
-  customer_id: number
-  staff_id?: number | null
-  check_in_time?: string | null
-}
-
-export type ordersUpdateWithoutVehiclesInput = {
-  order_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  service_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  payment_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  check_in_time?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  customers?: Prisma.customersUpdateOneRequiredWithoutOrdersNestedInput
-  staffs?: Prisma.staffsUpdateOneWithoutOrdersNestedInput
-  order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
-  payments?: Prisma.paymentsUpdateManyWithoutOrdersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutOrdersNestedInput
-}
-
-export type ordersUncheckedUpdateWithoutVehiclesInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  order_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  service_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  payment_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  customer_id?: Prisma.IntFieldUpdateOperationsInput | number
-  staff_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  check_in_time?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
-  payments?: Prisma.paymentsUncheckedUpdateManyWithoutOrdersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutOrdersNestedInput
-}
-
-export type ordersUncheckedUpdateManyWithoutVehiclesInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  order_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  service_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  payment_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  customer_id?: Prisma.IntFieldUpdateOperationsInput | number
-  staff_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  check_in_time?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-}
-
 export type ordersCreateManyStaffsInput = {
   id?: number
   order_date?: Date | string | null
@@ -1145,6 +1092,51 @@ export type ordersUncheckedUpdateManyWithoutStaffsInput = {
   payment_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customer_id?: Prisma.IntFieldUpdateOperationsInput | number
   vehicle_id?: Prisma.IntFieldUpdateOperationsInput | number
+  check_in_time?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type ordersCreateManyVehiclesInput = {
+  id?: number
+  order_date?: Date | string | null
+  service_status?: string | null
+  payment_status?: string | null
+  customer_id: number
+  staff_id?: number | null
+  check_in_time?: string | null
+}
+
+export type ordersUpdateWithoutVehiclesInput = {
+  order_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  service_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payment_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  check_in_time?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customers?: Prisma.customersUpdateOneRequiredWithoutOrdersNestedInput
+  staffs?: Prisma.staffsUpdateOneWithoutOrdersNestedInput
+  order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
+  payments?: Prisma.paymentsUpdateManyWithoutOrdersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutOrdersNestedInput
+}
+
+export type ordersUncheckedUpdateWithoutVehiclesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  order_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  service_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payment_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customer_id?: Prisma.IntFieldUpdateOperationsInput | number
+  staff_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  check_in_time?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
+  payments?: Prisma.paymentsUncheckedUpdateManyWithoutOrdersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutOrdersNestedInput
+}
+
+export type ordersUncheckedUpdateManyWithoutVehiclesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  order_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  service_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payment_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customer_id?: Prisma.IntFieldUpdateOperationsInput | number
+  staff_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   check_in_time?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
