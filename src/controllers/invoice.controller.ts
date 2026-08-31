@@ -1,17 +1,29 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { prisma } from "../config/prisma";
-import { errorResponse } from "../utils/response";
+import { successResponse, errorResponse } from "../utils/response";
+import { AuthRequest } from "../middlewares/auth.middleware";
+import { UserRole } from "../../generated/prisma/enums";
+
+const parseId = (value: string | string[] | undefined): number | null => {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const id = Number(value);
+
+  return Number.isInteger(id) && id > 0 ? id : null;
+};
 
 export const getInvoiceById = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const invoiceId = Number(req.params.id);
+    const invoiceId = parseId(req.params.id);
 
-    if (isNaN(invoiceId)) {
-      return errorResponse(res, "Invoice Id is not valid", 400);
+    if (!invoiceId) {
+      return errorResponse(res, "Invalid invoice id", 400);
     }
 
     const invoice = await prisma.invoices.findUnique({
@@ -24,7 +36,6 @@ export const getInvoiceById = async (
             customers: true,
             vehicles: true,
             staffs: true,
-
             order_items: {
               include: {
                 services: true,
@@ -37,13 +48,26 @@ export const getInvoiceById = async (
     });
 
     if (!invoice) {
-      return errorResponse(res, "Invoice is not found", 404);
+      return errorResponse(res, "Invoice not found", 404);
     }
 
-    return res.status(200).json({
-      success: true,
-      data: invoice,
-    });
+    if (req.user?.role === UserRole.CUSTOMER) {
+      const customer = await prisma.customers.findUnique({
+        where: {
+          user_id: req.user.id,
+        },
+      });
+
+      if (!customer || invoice.orders.customer_id !== customer.id) {
+        return errorResponse(
+          res,
+          "You are not allowed to view this invoice",
+          403,
+        );
+      }
+    }
+
+    return successResponse(res, invoice, "Invoice retrieved successfully");
   } catch (err) {
     next(err);
   }

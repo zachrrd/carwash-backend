@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../src/config/prisma";
+import { UserRole } from "../generated/prisma/enums";
 
 async function main() {
   const adminPassword = await bcrypt.hash("admin123", 10);
@@ -14,7 +15,7 @@ async function main() {
       name: "Administrator",
       email: "admin@carwash.com",
       password: adminPassword,
-      role: "Admin",
+      role: UserRole.ADMIN,
     },
   });
 
@@ -27,7 +28,7 @@ async function main() {
       name: "Cashier",
       email: "cashier@carwash.com",
       password: cashierPassword,
-      role: "Cashier",
+      role: UserRole.CASHIER,
     },
   });
 

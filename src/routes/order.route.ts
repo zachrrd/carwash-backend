@@ -5,21 +5,43 @@ import {
     createOrder,
     updateOrder,
     deleteOrder,
+    completeOrder,
+    updateOrderStatus,
+    cancelOrderByAdmin,
     createOrderByCustomer,
     getMyOrders,
+    cancelOrderByCustomer,
 } from "../controllers/order.controller";
 import { authenticateToken } from "../middlewares/auth.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 
 const router = Router();
 
-router.post("/customer", authenticateToken, authorizeRoles("Customer"), createOrderByCustomer);
-router.get("/customer/my-orders", authenticateToken, authorizeRoles("Customer"), getMyOrders);
+router.post("/customer", authenticateToken, authorizeRoles("CUSTOMER"), createOrderByCustomer);
+router.get("/customer/my-orders", authenticateToken, authorizeRoles("CUSTOMER"), getMyOrders);
+router.patch("/customer/:id/cancel", authenticateToken, authorizeRoles("CUSTOMER"), cancelOrderByCustomer);
 
-router.get("/", authenticateToken, authorizeRoles("Admin", "Cashier"), getAllOrders);
-router.get("/:id",authenticateToken, authorizeRoles("Admin", "Cashier"), getOrderById);
-router.post("/",authenticateToken, authorizeRoles("Admin", "Cashier"), createOrder);
-router.put("/:id",authenticateToken, authorizeRoles("Admin", "Cashier"), updateOrder);
-router.delete("/:id",authenticateToken, authorizeRoles("Admin", "Cashier"), deleteOrder);
-
+router.get("/", authenticateToken, authorizeRoles("ADMIN", "CASHIER"), getAllOrders);
+router.get("/:id", authenticateToken, authorizeRoles("ADMIN", "CASHIER", "CUSTOMER"), getOrderById);
+router.post("/", authenticateToken, authorizeRoles("ADMIN", "CASHIER"), createOrder);
+router.put("/:id", authenticateToken, authorizeRoles("ADMIN", "CASHIER"), updateOrder);
+router.delete("/:id", authenticateToken, authorizeRoles("ADMIN", "CASHIER"), deleteOrder);
+router.patch(
+  "/:id/cancel",
+  authenticateToken,
+  authorizeRoles("ADMIN"),
+  cancelOrderByAdmin,
+);
+router.patch(
+  "/:id/complete",
+  authenticateToken,
+  authorizeRoles("ADMIN", "CASHIER"),
+  completeOrder,
+);
+router.patch(
+  "/:id/status",
+  authenticateToken,
+  authorizeRoles("ADMIN", "CASHIER"),
+  updateOrderStatus,
+);
 export default router;

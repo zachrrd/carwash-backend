@@ -10,21 +10,21 @@ const router = Router();
 router.post(
   "/",
   authenticateToken,
-  authorizeRoles("Admin", "Cashier"),
+  authorizeRoles("ADMIN", "CASHIER"),
   createPayment
 );
 
 router.get(
   "/",
   authenticateToken,
-  authorizeRoles("Admin", "Cashier"),
+  authorizeRoles("ADMIN", "CASHIER"),
   getPayments
 );
 
 router.get(
   "/order/:order_id",
   authenticateToken,
-  authorizeRoles("Admin", "Cashier"),
+  authorizeRoles("ADMIN", "CASHIER"),
   getPaymentByOrder
 );
 export default router;

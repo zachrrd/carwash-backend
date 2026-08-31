@@ -105,7 +105,6 @@ export type CustomersScalarFieldEnum = (typeof CustomersScalarFieldEnum)[keyof t
 
 export const StaffsScalarFieldEnum = {
   id: 'id',
-  user_id: 'user_id',
   name: 'name',
   phone: 'phone',
   status: 'status',
@@ -137,6 +136,8 @@ export const ServicesScalarFieldEnum = {
   duration: 'duration',
   price: 'price',
   status: 'status',
+  image_url: 'image_url',
+  image_id: 'image_id',
   created_at: 'created_at',
   updated_at: 'updated_at',
   deleted_at: 'deleted_at'
@@ -148,6 +149,7 @@ export type ServicesScalarFieldEnum = (typeof ServicesScalarFieldEnum)[keyof typ
 export const OrdersScalarFieldEnum = {
   id: 'id',
   order_date: 'order_date',
+  created_at: 'created_at',
   service_status: 'service_status',
   payment_status: 'payment_status',
   customer_id: 'customer_id',

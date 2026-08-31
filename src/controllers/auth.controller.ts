@@ -5,6 +5,9 @@ import jwt from "jsonwebtoken";
 import { prisma } from "../config/prisma";
 import { errorResponse, successResponse } from "../utils/response";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import { registerSchema, loginSchema } from "../validations/auth.validation";
+
+import { UserRole } from "../../generated/prisma/enums";
 
 export const login = async (
   req: Request,
@@ -12,11 +15,19 @@ export const login = async (
   next: NextFunction,
 ) => {
   try {
-    const { email, password } = req.body;
+    // 1. Validasi dengan Zod
+    const parsed = loginSchema.safeParse(req.body);
 
-    if (!email || !password) {
-      return errorResponse(res, "Email and password are required", 400);
+    if (!parsed.success) {
+      const errors = parsed.error.issues.map((err) => ({
+        field: err.path.join("."),
+        message: err.message,
+      }));
+
+      return errorResponse(res, "Validation failed", 400, errors);
     }
+
+    const { email, password } = parsed.data;
 
     const user = await prisma.users.findUnique({
       where: { email },
@@ -68,12 +79,21 @@ export const register = async (
   next: NextFunction,
 ) => {
   try {
-    const { name, email, password, phone } = req.body;
+    // 1. Validasi dengan Zod
+    const parsed = registerSchema.safeParse(req.body);
 
-    if (!name || !email || !password) {
-      return errorResponse(res, "Name, email, and password are required", 400);
+    if (!parsed.success) {
+      const errors = parsed.error.issues.map((err) => ({
+        field: err.path.join("."),
+        message: err.message,
+      }));
+
+      return errorResponse(res, "Validation failed", 400, errors);
     }
 
+    const { name, email, password, phone } = parsed.data;
+
+    // 2. Cek email sudah terdaftar
     const existingUser = await prisma.users.findUnique({
       where: { email },
     });
@@ -82,15 +102,26 @@ export const register = async (
       return errorResponse(res, "Email already registered", 409);
     }
 
+    // 3. Cek nomor telepon sudah terdaftar
+    const existingPhone = await prisma.customers.findFirst({
+      where: { phone },
+    });
+
+    if (existingPhone) {
+      return errorResponse(res, "Phone number already registered", 409);
+    }
+
+    // 4. Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // 5. Transaction
     const result = await prisma.$transaction(async (tx) => {
       const newUser = await tx.users.create({
         data: {
           name,
           email,
           password: hashedPassword,
-          role: "Customer",
+          role: UserRole.CUSTOMER,
         },
       });
 
@@ -98,13 +129,14 @@ export const register = async (
         data: {
           user_id: newUser.id,
           name,
-          phone: phone || null,
+          phone,
         },
       });
 
       return { newUser, newCustomer };
     });
 
+    // 6. Generate JWT
     const token = jwt.sign(
       {
         id: result.newUser.id,
@@ -112,9 +144,7 @@ export const register = async (
         role: result.newUser.role,
       },
       process.env.JWT_SECRET as string,
-      {
-        expiresIn: "1d",
-      },
+      { expiresIn: "1d" },
     );
 
     return successResponse(
@@ -164,13 +194,6 @@ export const me = async (
             phone: true,
           },
         },
-        staff: {
-          select: {
-            id: true,
-            phone: true,
-            status: true,
-          },
-        },
       },
     });
 
@@ -179,6 +202,77 @@ export const me = async (
     }
 
     return successResponse(res, user, "Get profile successful");
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const customerLogin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const parsed = loginSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      const errors = parsed.error.issues.map((err) => ({
+        field: err.path.join("."),
+        message: err.message,
+      }));
+
+      return errorResponse(res, "Validation failed", 400, errors);
+    }
+
+    const { email, password } = parsed.data;
+
+    const user = await prisma.users.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      return errorResponse(res, "Invalid email or password", 401);
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      return errorResponse(res, "Invalid email or password", 401);
+    }
+
+    if (user.role !== UserRole.CUSTOMER) {
+      return errorResponse(
+        res,
+        "This account is not registered as a customer",
+        403,
+      );
+    }
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      process.env.JWT_SECRET as string,
+      {
+        expiresIn: "1d",
+      },
+    );
+
+    return successResponse(
+      res,
+      {
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      },
+      "Customer login successful",
+    );
   } catch (err) {
     next(err);
   }

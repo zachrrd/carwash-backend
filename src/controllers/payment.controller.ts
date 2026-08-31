@@ -1,6 +1,42 @@
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/prisma";
-import { errorResponse } from "../utils/response";
+import { successResponse, errorResponse } from "../utils/response";
+import {
+  OrderServiceStatus,
+  PaymentMethod,
+  PaymentStatus,
+} from "../../generated/prisma/enums";
+
+const parseId = (value: unknown): number | null => {
+  const id = Number(value);
+
+  return Number.isInteger(id) && id > 0 ? id : null;
+};
+
+const isValidEnumValue = <T extends Record<string, string>>(
+  enumObject: T,
+  value: unknown,
+): value is T[keyof T] => {
+  return (
+    typeof value === "string" &&
+    Object.values(enumObject).includes(value as T[keyof T])
+  );
+};
+
+const parsePositiveAmount = (value: unknown): number | null => {
+  const amount = Number(value);
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return null;
+  }
+
+  return amount;
+};
+
+const allowedPaymentOrderStatuses: OrderServiceStatus[] = [
+  OrderServiceStatus.WAITING,
+  OrderServiceStatus.CONFIRMED,
+];
 
 export const createPayment = async (
   req: Request,
@@ -10,50 +46,53 @@ export const createPayment = async (
   try {
     const { order_id, amount_received, payment_method } = req.body;
 
-    // =========================
-    // 1. VALIDATION INPUT
-    // =========================
+    const orderId = parseId(order_id);
 
-    const orderId = Number(order_id);
-    const amountReceived = Number(amount_received);
-
-    if (isNaN(orderId)) {
-      return errorResponse(res, "Order ID tidak valid", 400);
+    if (!orderId) {
+      return errorResponse(res, "Invalid order id", 400);
     }
 
-    if (isNaN(amountReceived) || amountReceived <= 0) {
-      return errorResponse(res, "Jumlah pembayaran tidak valid", 400);
+    const amountReceived = parsePositiveAmount(amount_received);
+
+    if (amountReceived === null) {
+      return errorResponse(res, "Payment amount must be greater than 0", 400);
     }
 
-    if (!payment_method) {
-      return errorResponse(res, "Payment method wajib diisi", 400);
+    if (!isValidEnumValue(PaymentMethod, payment_method)) {
+      return errorResponse(res, "Invalid payment method", 400);
     }
-
-    // =========================
-    // 2. FIND ORDER
-    // =========================
 
     const order = await prisma.orders.findUnique({
       where: {
         id: orderId,
       },
+      include: {
+        order_items: {
+          include: {
+            services: true,
+          },
+        },
+      },
     });
 
     if (!order) {
-      return errorResponse(res, "Order tidak ditemukan", 404);
+      return errorResponse(res, "Order not found", 404);
     }
 
-    // =========================
-    // 3. CHECK PAYMENT STATUS
-    // =========================
+    if (
+      order.service_status === null ||
+      !allowedPaymentOrderStatuses.includes(order.service_status)
+    ) {
+      return errorResponse(
+        res,
+        "Only waiting or confirmed orders can be paid",
+        400,
+      );
+    }
 
-    if (order.payment_status === "Paid") {
+    if (order.payment_status === PaymentStatus.PAID) {
       return errorResponse(res, "Order ini sudah dibayar", 400);
     }
-
-    // =========================
-    // 4. CHECK EXISTING PAYMENT
-    // =========================
 
     const existingPayment = await prisma.payments.findFirst({
       where: {
@@ -65,10 +104,6 @@ export const createPayment = async (
       return errorResponse(res, "Payment untuk order ini sudah ada", 400);
     }
 
-    // =========================
-    // 5. CHECK EXISTING INVOICE
-    // =========================
-
     const existingInvoice = await prisma.invoices.findFirst({
       where: {
         order_id: orderId,
@@ -79,34 +114,17 @@ export const createPayment = async (
       return errorResponse(res, "Invoice untuk order ini sudah ada", 400);
     }
 
-    // =========================
-    // 6. GET ORDER ITEMS
-    // =========================
-
-    const orderItems = await prisma.order_items.findMany({
-      where: {
-        order_id: orderId,
-      },
-      include: {
-        services: true,
-      },
-    });
-
-    if (orderItems.length === 0) {
-      return errorResponse(res, "Order item tidak ditemukan", 404);
+    if (order.order_items.length === 0) {
+      return errorResponse(res, "Order has no service items", 400);
     }
 
-    // =========================
-    // 7. CALCULATE TOTAL
-    // =========================
-
-    const totalAmount = orderItems.reduce((total, item) => {
+    const totalAmount = order.order_items.reduce((total, item) => {
       return total + Number(item.services.price) * (item.qty ?? 1);
     }, 0);
 
-    // =========================
-    // 8. VALIDATE PAYMENT
-    // =========================
+    if (totalAmount <= 0) {
+      return errorResponse(res, "Order total must be greater than 0", 400);
+    }
 
     if (amountReceived < totalAmount) {
       return errorResponse(res, "Jumlah pembayaran kurang", 400);
@@ -114,29 +132,54 @@ export const createPayment = async (
 
     const changeAmount = amountReceived - totalAmount;
 
-    // =========================
-    // 9. TRANSACTION
-    // =========================
-
     const result = await prisma.$transaction(async (tx) => {
-      // Re-check order inside transaction
       const currentOrder = await tx.orders.findUnique({
         where: {
           id: orderId,
         },
+        include: {
+          order_items: {
+            include: {
+              services: true,
+            },
+          },
+        },
       });
 
       if (!currentOrder) {
-        throw new Error("Order tidak ditemukan");
+        throw new Error("Order not found");
       }
 
-      if (currentOrder.payment_status === "Paid") {
+      if (
+        currentOrder.service_status === null ||
+        !allowedPaymentOrderStatuses.includes(currentOrder.service_status)
+      ) {
+        throw new Error("Only waiting or confirmed orders can be paid");
+      }
+
+      if (currentOrder.payment_status === PaymentStatus.PAID) {
         throw new Error("Order ini sudah dibayar");
       }
 
-      // =========================
-      // CREATE PAYMENT
-      // =========================
+      const currentPayment = await tx.payments.findFirst({
+        where: {
+          order_id: orderId,
+        },
+      });
+
+      if (currentPayment) {
+        throw new Error("Payment untuk order ini sudah ada");
+      }
+
+      const currentInvoice = await tx.invoices.findFirst({
+        where: {
+          order_id: orderId,
+        },
+      });
+
+      if (currentInvoice) {
+        throw new Error("Invoice untuk order ini sudah ada");
+      }
 
       const payment = await tx.payments.create({
         data: {
@@ -147,22 +190,14 @@ export const createPayment = async (
         },
       });
 
-      // =========================
-      // UPDATE ORDER → PAID
-      // =========================
-
-      await tx.orders.update({
+      const updatedOrder = await tx.orders.update({
         where: {
           id: orderId,
         },
         data: {
-          payment_status: "Paid",
+          payment_status: PaymentStatus.PAID,
         },
       });
-
-      // =========================
-      // CREATE INVOICE
-      // =========================
 
       const invoiceNumber = `INV-${String(orderId).padStart(6, "0")}`;
 
@@ -177,18 +212,11 @@ export const createPayment = async (
       return {
         payment,
         invoice,
+        order: updatedOrder,
       };
     });
 
-    // =========================
-    // RESPONSE
-    // =========================
-
-    return res.status(201).json({
-      success: true,
-      message: "Payment berhasil dibuat",
-      data: result,
-    });
+    return successResponse(res, result, "Payment created successfully", 201);
   } catch (err) {
     next(err);
   }
@@ -200,13 +228,53 @@ export const getPayments = async (
   next: NextFunction,
 ) => {
   try {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
+    const page = Math.max(Number(req.query.page) || 1, 1);
+
+    const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
 
     const skip = (page - 1) * limit;
 
+    const search =
+      typeof req.query.search === "string"
+        ? req.query.search.trim()
+        : typeof req.query.q === "string"
+          ? req.query.q.trim()
+          : "";
+    const paymentMethod = req.query.payment_method as PaymentMethod | undefined;
+
+    const where: any = {
+      ...(paymentMethod &&
+        isValidEnumValue(PaymentMethod, paymentMethod) && {
+          payment_method: paymentMethod,
+        }),
+      ...(search && {
+        OR: [
+          {
+            orders: {
+              customers: { name: { contains: search, mode: "insensitive" } },
+            },
+          },
+          {
+            orders: {
+              vehicles: {
+                plate_number: { contains: search, mode: "insensitive" },
+              },
+            },
+          },
+          {
+            orders: {
+              invoices: {
+                some: { invoice_no: { contains: search, mode: "insensitive" } },
+              },
+            },
+          },
+        ],
+      }),
+    };
+
     const [payments, total] = await Promise.all([
       prisma.payments.findMany({
+        where,
         skip,
         take: limit,
         include: {
@@ -229,14 +297,15 @@ export const getPayments = async (
         },
       }),
 
-      prisma.payments.count(),
+      prisma.payments.count({ where }),
     ]);
 
     const totalPages = Math.ceil(total / limit);
 
-    return res.status(200).json({
-      success: true,
-      data: {
+    return successResponse(
+      res,
+      {
+        payments,
         data: payments,
         pagination: {
           page,
@@ -245,7 +314,8 @@ export const getPayments = async (
           totalPages,
         },
       },
-    });
+      "Payments retrieved successfully",
+    );
   } catch (err) {
     next(err);
   }
@@ -257,10 +327,10 @@ export const getPaymentByOrder = async (
   next: NextFunction,
 ) => {
   try {
-    const orderId = Number(req.params.order_id);
+    const orderId = parseId(req.params.order_id);
 
-    if (isNaN(orderId)) {
-      return errorResponse(res, "Order ID tidak valid", 400);
+    if (!orderId) {
+      return errorResponse(res, "Invalid order id", 400);
     }
 
     const payments = await prisma.payments.findMany({
@@ -282,16 +352,16 @@ export const getPaymentByOrder = async (
           },
         },
       },
+      orderBy: {
+        id: "desc",
+      },
     });
 
     if (payments.length === 0) {
       return errorResponse(res, "Payment untuk order tidak ditemukan", 404);
     }
 
-    return res.status(200).json({
-      success: true,
-      data: payments,
-    });
+    return successResponse(res, payments, "Payments retrieved successfully");
   } catch (err) {
     next(err);
   }

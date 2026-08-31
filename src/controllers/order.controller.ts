@@ -2,6 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/prisma";
 import { successResponse, errorResponse } from "../utils/response";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import {
+  ActiveStatus,
+  OrderServiceStatus,
+  PaymentStatus,
+  UserRole,
+} from "../../generated/prisma/enums";
 
 interface OrderItemInput {
   service_id: number;
@@ -9,9 +15,130 @@ interface OrderItemInput {
   subtotal: number;
 }
 
-// =========================
-// GET ALL ORDERS
-// =========================
+const parseId = (value: string | string[] | undefined): number | null => {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const id = Number(value);
+
+  return Number.isInteger(id) && id > 0 ? id : null;
+};
+
+const isValidEnumValue = <T extends Record<string, string>>(
+  enumObject: T,
+  value: unknown,
+): value is T[keyof T] => {
+  return (
+    typeof value === "string" &&
+    Object.values(enumObject).includes(value as T[keyof T])
+  );
+};
+
+const validateQuantity = (qty: unknown): number | null => {
+  const value = Number(qty);
+
+  if (!Number.isInteger(value) || value <= 0) {
+    return null;
+  }
+
+  return value;
+};
+
+const validateCheckInTime = (value: unknown): string | null => {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const isValid = /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
+
+  return isValid ? value : null;
+};
+
+const orderInclude = {
+  customers: true,
+  vehicles: true,
+  staffs: true,
+  order_items: {
+    include: {
+      services: true,
+    },
+  },
+  invoices: true,
+  payments: true,
+};
+
+const getValidatedServices = async (
+  items: unknown,
+): Promise<OrderItemInput[] | null> => {
+  if (!Array.isArray(items) || items.length === 0) {
+    return null;
+  }
+
+  const serviceIds = [
+    ...new Set(
+      items.map((item: { service_id: number }) => Number(item.service_id)),
+    ),
+  ];
+
+  if (
+    serviceIds.some(
+      (serviceId) => !Number.isInteger(serviceId) || serviceId <= 0,
+    )
+  ) {
+    throw new Error("INVALID_SERVICE_ID");
+  }
+
+  const services = await prisma.services.findMany({
+    where: {
+      id: {
+        in: serviceIds,
+      },
+      deleted_at: null,
+    },
+  });
+
+  if (services.length !== serviceIds.length) {
+    throw new Error("SERVICE_NOT_FOUND");
+  }
+
+  const inactiveServices = services.filter(
+    (service) => service.status !== ActiveStatus.ACTIVE,
+  );
+
+  if (inactiveServices.length > 0) {
+    throw new Error("INACTIVE_SERVICE");
+  }
+
+  const orderItems: OrderItemInput[] = [];
+
+  for (const item of items) {
+    const serviceId = Number(item.service_id);
+    const qty = validateQuantity(item.qty);
+
+    if (!qty) {
+      throw new Error("INVALID_QUANTITY");
+    }
+
+    const service = services.find((service) => service.id === serviceId);
+
+    if (!service) {
+      throw new Error("SERVICE_NOT_FOUND");
+    }
+
+    orderItems.push({
+      service_id: serviceId,
+      qty,
+      subtotal: Number(service.price) * qty,
+    });
+  }
+
+  return orderItems;
+};
 
 export const getAllOrders = async (
   req: Request,
@@ -20,49 +147,78 @@ export const getAllOrders = async (
 ) => {
   try {
     const page = Math.max(Number(req.query.page) || 1, 1);
-    const limit = Math.max(Number(req.query.limit) || 10, 1);
-
+    const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
     const skip = (page - 1) * limit;
+
+    const search =
+      typeof req.query.search === "string"
+        ? req.query.search.trim()
+        : typeof req.query.q === "string"
+          ? req.query.q.trim()
+          : "";
+    const serviceStatus = req.query.service_status as
+      | OrderServiceStatus
+      | undefined;
+    const paymentStatus = req.query.payment_status as PaymentStatus | undefined;
+    const customerId = req.query.customer_id
+      ? Number(req.query.customer_id)
+      : undefined;
+    const staffId = req.query.staff_id ? Number(req.query.staff_id) : undefined;
+
+    const where: any = {
+      ...(serviceStatus &&
+        isValidEnumValue(OrderServiceStatus, serviceStatus) && {
+          service_status: serviceStatus,
+        }),
+      ...(paymentStatus &&
+        isValidEnumValue(PaymentStatus, paymentStatus) && {
+          payment_status: paymentStatus,
+        }),
+      ...(customerId && { customer_id: customerId }),
+      ...(staffId && { staff_id: staffId }),
+      ...(search && {
+        OR: [
+          { customers: { name: { contains: search, mode: "insensitive" } } },
+          { customers: { phone: { contains: search, mode: "insensitive" } } },
+          {
+            vehicles: {
+              plate_number: { contains: search, mode: "insensitive" },
+            },
+          },
+          { vehicles: { brand: { contains: search, mode: "insensitive" } } },
+          { vehicles: { model: { contains: search, mode: "insensitive" } } },
+          {
+            invoices: {
+              some: { invoice_no: { contains: search, mode: "insensitive" } },
+            },
+          },
+        ],
+      }),
+    };
 
     const [orders, total] = await Promise.all([
       prisma.orders.findMany({
+        where,
         skip,
         take: limit,
-
         orderBy: {
           id: "desc",
         },
-
-        include: {
-          customers: true,
-          vehicles: true,
-          staffs: true,
-
-          order_items: {
-            include: {
-              services: true,
-            },
-          },
-
-          invoices: true,
-        },
+        include: orderInclude,
       }),
-
-      prisma.orders.count(),
+      prisma.orders.count({ where }),
     ]);
-
-    const totalPages = Math.ceil(total / limit);
 
     return successResponse(
       res,
       {
+        orders,
         data: orders,
-
         pagination: {
           page,
           limit,
           total,
-          totalPages,
+          totalPages: Math.ceil(total / limit),
         },
       },
       "Orders retrieved successfully",
@@ -72,19 +228,15 @@ export const getAllOrders = async (
   }
 };
 
-// =========================
-// GET ORDER BY ID
-// =========================
-
 export const getOrderById = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const id = Number(req.params.id);
+    const id = parseId(req.params.id);
 
-    if (isNaN(id)) {
+    if (!id) {
       return errorResponse(res, "Invalid order id", 400);
     }
 
@@ -92,21 +244,31 @@ export const getOrderById = async (
       where: {
         id,
       },
-      include: {
-        customers: true,
-        vehicles: true,
-        staffs: true,
-        order_items: {
-          include: {
-            services: true,
-          },
-        },
-        invoices: true,
-      },
+      include: orderInclude,
     });
 
     if (!order) {
       return errorResponse(res, "Order not found", 404);
+    }
+
+    if (req.user?.role === UserRole.CUSTOMER) {
+      const customer = await prisma.customers.findUnique({
+        where: {
+          user_id: req.user.id,
+        },
+      });
+
+      if (!customer) {
+        return errorResponse(res, "Customer profile not found", 404);
+      }
+
+      if (order.customer_id !== customer.id) {
+        return errorResponse(
+          res,
+          "You are not allowed to view this order",
+          403,
+        );
+      }
     }
 
     return successResponse(res, order, "Order retrieved successfully");
@@ -115,49 +277,31 @@ export const getOrderById = async (
   }
 };
 
-// =========================
-// CREATE ORDER
-// =========================
-
 export const createOrder = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const {
-      customer_id,
-      vehicle_id,
-      staff_id,
-      service_status,
-      check_in_time,
-      items,
-    } = req.body;
+    const { customer_id, vehicle_id, staff_id, check_in_time, items } =
+      req.body;
 
-    // =========================
-    // BASIC VALIDATION
-    // =========================
+    const customerId = Number(customer_id);
+    const vehicleId = Number(vehicle_id);
 
     if (
-      !customer_id ||
-      !vehicle_id ||
-      !Array.isArray(items) ||
-      items.length === 0
+      !Number.isInteger(customerId) ||
+      customerId <= 0 ||
+      !Number.isInteger(vehicleId) ||
+      vehicleId <= 0
     ) {
-      return errorResponse(
-        res,
-        "Customer, vehicle, and services are required",
-        400,
-      );
+      return errorResponse(res, "Valid customer and vehicle are required", 400);
     }
 
-    // =========================
-    // CUSTOMER VALIDATION
-    // =========================
-
-    const customer = await prisma.customers.findUnique({
+    const customer = await prisma.customers.findFirst({
       where: {
-        id: Number(customer_id),
+        id: customerId,
+        deleted_at: null,
       },
     });
 
@@ -165,37 +309,35 @@ export const createOrder = async (
       return errorResponse(res, "Customer not found", 404);
     }
 
-    // =========================
-    // VEHICLE VALIDATION
-    // =========================
-
-    const vehicle = await prisma.vehicles.findUnique({
+    const vehicle = await prisma.vehicles.findFirst({
       where: {
-        id: Number(vehicle_id),
+        id: vehicleId,
+        customer_id: customerId,
+        deleted_at: null,
       },
     });
 
     if (!vehicle) {
-      return errorResponse(res, "Vehicle not found", 404);
-    }
-
-    // Pastikan vehicle memang milik customer
-    if (vehicle.customer_id !== Number(customer_id)) {
       return errorResponse(
         res,
-        "Vehicle does not belong to this customer",
-        400,
+        "Vehicle not found or does not belong to this customer",
+        404,
       );
     }
 
-    // =========================
-    // STAFF VALIDATION
-    // =========================
+    let finalStaffId: number | null = null;
 
     if (staff_id !== undefined && staff_id !== null) {
-      const staff = await prisma.staffs.findUnique({
+      const staffId = Number(staff_id);
+
+      if (!Number.isInteger(staffId) || staffId <= 0) {
+        return errorResponse(res, "Invalid staff id", 400);
+      }
+
+      const staff = await prisma.staffs.findFirst({
         where: {
-          id: Number(staff_id),
+          id: staffId,
+          deleted_at: null,
         },
       });
 
@@ -203,136 +345,82 @@ export const createOrder = async (
         return errorResponse(res, "Staff not found", 404);
       }
 
-      // Hanya staff Active yang boleh dipilih
-      if (staff.status !== "Active") {
+      if (staff.status !== ActiveStatus.ACTIVE) {
         return errorResponse(
           res,
           "Staff is inactive and cannot be assigned to an order",
           400,
         );
       }
+
+      finalStaffId = staffId;
     }
 
-    // =========================
-    // SERVICE VALIDATION
-    // =========================
+    const finalCheckInTime = validateCheckInTime(check_in_time);
 
-    const serviceIds = [
-      ...new Set(
-        items.map((item: { service_id: number }) => Number(item.service_id)),
-      ),
-    ];
-
-    const services = await prisma.services.findMany({
-      where: {
-        id: {
-          in: serviceIds,
-        },
-      },
-    });
-
-    // Pastikan semua service ditemukan
-    if (services.length !== serviceIds.length) {
-      return errorResponse(res, "One or more services not found", 404);
+    if (check_in_time !== undefined && finalCheckInTime === null) {
+      return errorResponse(res, "Check-in time must use HH:mm format", 400);
     }
 
-    // Pastikan semua service Active
-    const inactiveServices = services.filter(
-      (service) => service.status !== "Active",
-    );
+    let orderItems: OrderItemInput[] | null;
 
-    if (inactiveServices.length > 0) {
-      return errorResponse(res, "One or more services are inactive", 400);
-    }
+    try {
+      orderItems = await getValidatedServices(items);
+    } catch (err) {
+      if (err instanceof Error) {
+        if (err.message === "INVALID_SERVICE_ID") {
+          return errorResponse(res, "Invalid service id", 400);
+        }
 
-    // =========================
-    // VALIDATE QUANTITY
-    // =========================
+        if (err.message === "SERVICE_NOT_FOUND") {
+          return errorResponse(res, "One or more services not found", 404);
+        }
 
-    for (const item of items) {
-      const qty = Number(item.qty);
+        if (err.message === "INACTIVE_SERVICE") {
+          return errorResponse(res, "One or more services are inactive", 400);
+        }
 
-      if (!Number.isInteger(qty) || qty <= 0) {
-        return errorResponse(
-          res,
-          "Service quantity must be greater than 0",
-          400,
-        );
+        if (err.message === "INVALID_QUANTITY") {
+          return errorResponse(
+            res,
+            "Service quantity must be greater than 0",
+            400,
+          );
+        }
       }
+
+      throw err;
     }
 
-    // =========================
-    // CREATE ORDER ITEMS
-    // =========================
+    if (!orderItems || orderItems.length === 0) {
+      return errorResponse(res, "At least one service is required", 400);
+    }
 
-    const orderItems: OrderItemInput[] = items.map(
-      (item: { service_id: number; qty: number }) => {
-        const service = services.find(
-          (service) => service.id === Number(item.service_id),
-        );
-
-        const qty = Number(item.qty);
-
-        return {
-          service_id: Number(item.service_id),
-          qty,
-          subtotal: Number(service!.price) * qty,
-        };
+    const order = await prisma.orders.create({
+      data: {
+        customer_id: customerId,
+        vehicle_id: vehicleId,
+        staff_id: finalStaffId,
+        service_status: OrderServiceStatus.WAITING,
+        payment_status: PaymentStatus.UNPAID,
+        check_in_time: finalCheckInTime,
+        order_items: {
+          create: orderItems,
+        },
       },
-    );
-
-    // =========================
-    // CREATE ORDER
-    // =========================
-
-    const order = await prisma.$transaction(async (tx) => {
-      const order = await tx.orders.create({
-        data: {
-          customer_id: Number(customer_id),
-
-          vehicle_id: Number(vehicle_id),
-
-          staff_id:
-            staff_id === undefined || staff_id === null
-              ? null
-              : Number(staff_id),
-
-          service_status: service_status ?? "Waiting",
-
-          payment_status: "Unpaid",
-
-          check_in_time: check_in_time ?? null,
-
-          order_items: {
-            create: orderItems,
-          },
-        },
-
-        include: {
-          customers: true,
-          vehicles: true,
-          staffs: true,
-
-          order_items: {
-            include: {
-              services: true,
-            },
-          },
-        },
-      });
-
-      return order;
+      include: orderInclude,
     });
 
-    return successResponse(res, order, "Order created successfully", 201);
+    return successResponse(
+      res,
+      order,
+      "Order created successfully. Please complete payment before service starts.",
+      201,
+    );
   } catch (err) {
     next(err);
   }
 };
-
-// =========================
-// UPDATE ORDER
-// =========================
 
 export const updateOrder = async (
   req: Request,
@@ -340,19 +428,11 @@ export const updateOrder = async (
   next: NextFunction,
 ) => {
   try {
-    const id = Number(req.params.id);
+    const id = parseId(req.params.id);
 
-    // =========================
-    // VALIDATE ID
-    // =========================
-
-    if (isNaN(id)) {
+    if (!id) {
       return errorResponse(res, "Invalid order id", 400);
     }
-
-    // =========================
-    // FIND EXISTING ORDER
-    // =========================
 
     const existingOrder = await prisma.orders.findUnique({
       where: {
@@ -364,18 +444,16 @@ export const updateOrder = async (
       return errorResponse(res, "Order not found", 404);
     }
 
-    // Order Paid tidak boleh diedit
-    if (existingOrder.payment_status === "Paid") {
+    if (
+      existingOrder.service_status === OrderServiceStatus.COMPLETED ||
+      existingOrder.service_status === OrderServiceStatus.CANCELLED
+    ) {
       return errorResponse(
         res,
-        "Order yang sudah dibayar tidak dapat diubah",
+        `Order dengan status ${existingOrder.service_status} tidak dapat diubah`,
         400,
       );
     }
-
-    // =========================
-    // REQUEST BODY
-    // =========================
 
     const {
       customer_id,
@@ -386,25 +464,55 @@ export const updateOrder = async (
       items,
     } = req.body;
 
-    // =========================
-    // UPDATE DATA
-    // =========================
+    if (service_status !== undefined) {
+      return errorResponse(
+        res,
+        "Service status must be updated through the status endpoint",
+        400,
+      );
+    }
 
-    const updateData: any = {};
+    if (existingOrder.payment_status === PaymentStatus.PAID) {
+      const tryingToChangeOrderData =
+        customer_id !== undefined ||
+        vehicle_id !== undefined ||
+        staff_id !== undefined ||
+        check_in_time !== undefined ||
+        items !== undefined;
 
-    // =========================
-    // CUSTOMER
-    // =========================
+      if (tryingToChangeOrderData) {
+        return errorResponse(
+          res,
+          "Paid order cannot modify customer, vehicle, staff, check-in time, or services",
+          400,
+        );
+      }
+    }
 
     const finalCustomerId =
       customer_id !== undefined
         ? Number(customer_id)
         : existingOrder.customer_id;
 
-    if (customer_id !== undefined) {
-      const customer = await prisma.customers.findUnique({
+    if (!Number.isInteger(finalCustomerId) || finalCustomerId <= 0) {
+      return errorResponse(res, "Invalid customer id", 400);
+    }
+
+    const finalVehicleId =
+      vehicle_id !== undefined ? Number(vehicle_id) : existingOrder.vehicle_id;
+
+    if (!Number.isInteger(finalVehicleId) || finalVehicleId <= 0) {
+      return errorResponse(res, "Invalid vehicle id", 400);
+    }
+
+    if (
+      existingOrder.payment_status !== PaymentStatus.PAID &&
+      (customer_id !== undefined || vehicle_id !== undefined)
+    ) {
+      const customer = await prisma.customers.findFirst({
         where: {
           id: finalCustomerId,
+          deleted_at: null,
         },
       });
 
@@ -412,66 +520,42 @@ export const updateOrder = async (
         return errorResponse(res, "Customer not found", 404);
       }
 
-      updateData.customer_id = finalCustomerId;
-    }
-
-    // =========================
-    // VEHICLE
-    // =========================
-
-    const finalVehicleId =
-      vehicle_id !== undefined ? Number(vehicle_id) : existingOrder.vehicle_id;
-
-    if (vehicle_id !== undefined) {
-      const vehicle = await prisma.vehicles.findUnique({
+      const vehicle = await prisma.vehicles.findFirst({
         where: {
           id: finalVehicleId,
+          customer_id: finalCustomerId,
+          deleted_at: null,
         },
       });
 
       if (!vehicle) {
-        return errorResponse(res, "Vehicle not found", 404);
-      }
-
-      // Pastikan vehicle milik customer
-      if (vehicle.customer_id !== finalCustomerId) {
         return errorResponse(
           res,
-          "Vehicle does not belong to this customer",
-          400,
-        );
-      }
-
-      updateData.vehicle_id = finalVehicleId;
-    } else if (customer_id !== undefined) {
-      // Customer berubah,
-      // tapi vehicle tidak dikirim.
-      // Pastikan vehicle lama masih milik customer baru.
-
-      const vehicle = await prisma.vehicles.findUnique({
-        where: {
-          id: existingOrder.vehicle_id,
-        },
-      });
-
-      if (vehicle && vehicle.customer_id !== finalCustomerId) {
-        return errorResponse(
-          res,
-          "Vehicle does not belong to this customer",
-          400,
+          "Vehicle not found or does not belong to this customer",
+          404,
         );
       }
     }
 
-    // =========================
-    // STAFF
-    // =========================
+    let finalStaffId = existingOrder.staff_id;
 
-    if (staff_id !== undefined) {
-      if (staff_id !== null) {
-        const staff = await prisma.staffs.findUnique({
+    if (
+      existingOrder.payment_status !== PaymentStatus.PAID &&
+      staff_id !== undefined
+    ) {
+      if (staff_id === null) {
+        finalStaffId = null;
+      } else {
+        const staffId = Number(staff_id);
+
+        if (!Number.isInteger(staffId) || staffId <= 0) {
+          return errorResponse(res, "Invalid staff id", 400);
+        }
+
+        const staff = await prisma.staffs.findFirst({
           where: {
-            id: Number(staff_id),
+            id: staffId,
+            deleted_at: null,
           },
         });
 
@@ -479,8 +563,7 @@ export const updateOrder = async (
           return errorResponse(res, "Staff not found", 404);
         }
 
-        // Hanya staff Active
-        if (staff.status !== "Active") {
+        if (staff.status !== ActiveStatus.ACTIVE) {
           return errorResponse(
             res,
             "Staff is inactive and cannot be assigned to an order",
@@ -488,126 +571,80 @@ export const updateOrder = async (
           );
         }
 
-        updateData.staff_id = Number(staff_id);
-      } else {
-        updateData.staff_id = null;
+        finalStaffId = staffId;
       }
     }
 
-    // =========================
-    // SERVICE STATUS
-    // =========================
+    let finalCheckInTime = existingOrder.check_in_time;
 
-    if (service_status !== undefined) {
-      updateData.service_status = service_status;
+    if (
+      existingOrder.payment_status !== PaymentStatus.PAID &&
+      check_in_time !== undefined
+    ) {
+      finalCheckInTime = validateCheckInTime(check_in_time);
+
+      if (check_in_time !== null && finalCheckInTime === null) {
+        return errorResponse(res, "Check-in time must use HH:mm format", 400);
+      }
     }
-
-    // =========================
-    // CHECK IN TIME
-    // =========================
-
-    if (check_in_time !== undefined) {
-      updateData.check_in_time = check_in_time;
-    }
-
-    // =========================
-    // ORDER ITEMS
-    // =========================
 
     let orderItems: OrderItemInput[] | undefined;
 
-    if (items !== undefined) {
-      // Minimal harus ada 1 service
-      if (!Array.isArray(items) || items.length === 0) {
+    if (
+      existingOrder.payment_status !== PaymentStatus.PAID &&
+      items !== undefined
+    ) {
+      try {
+        const validatedItems = await getValidatedServices(items);
+
+        if (validatedItems === null) {
+          return errorResponse(res, "Invalid order items", 400);
+        }
+
+        orderItems = validatedItems;
+      } catch (err) {
+        if (err instanceof Error) {
+          if (err.message === "INVALID_SERVICE_ID") {
+            return errorResponse(res, "Invalid service id", 400);
+          }
+
+          if (err.message === "SERVICE_NOT_FOUND") {
+            return errorResponse(res, "One or more services not found", 404);
+          }
+
+          if (err.message === "INACTIVE_SERVICE") {
+            return errorResponse(res, "One or more services are inactive", 400);
+          }
+
+          if (err.message === "INVALID_QUANTITY") {
+            return errorResponse(
+              res,
+              "Service quantity must be greater than 0",
+              400,
+            );
+          }
+        }
+
+        throw err;
+      }
+
+      if (!orderItems || orderItems.length === 0) {
         return errorResponse(res, "Order must have at least one service", 400);
       }
-
-      // =========================
-      // VALIDATE QTY
-      // =========================
-
-      for (const item of items) {
-        const qty = Number(item.qty);
-
-        if (!Number.isInteger(qty) || qty <= 0) {
-          return errorResponse(
-            res,
-            "Service quantity must be greater than 0",
-            400,
-          );
-        }
-      }
-
-      // =========================
-      // GET SERVICES
-      // =========================
-
-      const serviceIds = [
-        ...new Set(
-          items.map((item: { service_id: number }) => Number(item.service_id)),
-        ),
-      ];
-
-      const services = await prisma.services.findMany({
-        where: {
-          id: {
-            in: serviceIds,
-          },
-        },
-      });
-
-      // Semua service harus ditemukan
-      if (services.length !== serviceIds.length) {
-        return errorResponse(res, "One or more services not found", 404);
-      }
-
-      // =========================
-      // ACTIVE SERVICE CHECK
-      // =========================
-
-      const inactiveServices = services.filter(
-        (service) => service.status !== "Active",
-      );
-
-      if (inactiveServices.length > 0) {
-        return errorResponse(res, "One or more services are inactive", 400);
-      }
-
-      // =========================
-      // CREATE ORDER ITEMS
-      // =========================
-
-      orderItems = items.map((item: { service_id: number; qty: number }) => {
-        const service = services.find(
-          (service) => service.id === Number(item.service_id),
-        );
-
-        const qty = Number(item.qty);
-
-        return {
-          service_id: Number(item.service_id),
-          qty,
-          subtotal: Number(service!.price) * qty,
-        };
-      });
     }
 
-    // =========================
-    // TRANSACTION
-    // =========================
-
-    const order = await prisma.$transaction(async (tx) => {
-      // Update order
+    const updatedOrder = await prisma.$transaction(async (tx) => {
       await tx.orders.update({
         where: {
           id,
         },
-        data: updateData,
+        data: {
+          customer_id: finalCustomerId,
+          vehicle_id: finalVehicleId,
+          staff_id: finalStaffId,
+          check_in_time: finalCheckInTime,
+        },
       });
-
-      // =========================
-      // UPDATE ORDER ITEMS
-      // =========================
 
       if (orderItems !== undefined) {
         await tx.order_items.deleteMany({
@@ -626,40 +663,199 @@ export const updateOrder = async (
         });
       }
 
-      // =========================
-      // GET UPDATED ORDER
-      // =========================
-
       return tx.orders.findUnique({
         where: {
           id,
         },
-
-        include: {
-          customers: true,
-          vehicles: true,
-          staffs: true,
-
-          order_items: {
-            include: {
-              services: true,
-            },
-          },
-
-          invoices: true,
-        },
+        include: orderInclude,
       });
     });
 
-    return successResponse(res, order, "Order updated successfully");
+    return successResponse(res, updatedOrder, "Order updated successfully");
   } catch (err) {
     next(err);
   }
 };
 
-// =========================
-// DELETE ORDER
-// =========================
+export const updateOrderStatus = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user) {
+      return errorResponse(res, "Unauthorized", 401);
+    }
+
+    const orderId = parseId(req.params.id);
+
+    if (!orderId) {
+      return errorResponse(res, "Invalid order id", 400);
+    }
+
+    const { service_status } = req.body;
+
+    if (!isValidEnumValue(OrderServiceStatus, service_status)) {
+      return errorResponse(res, "Invalid service status", 400);
+    }
+
+    if (service_status === OrderServiceStatus.WAITING) {
+      return errorResponse(
+        res,
+        "Order status cannot be changed back to waiting",
+        400,
+      );
+    }
+
+    if (service_status === OrderServiceStatus.CANCELLED) {
+      return errorResponse(
+        res,
+        "Use the cancel endpoint to cancel an order",
+        400,
+      );
+    }
+
+    const order = await prisma.orders.findUnique({
+      where: {
+        id: orderId,
+      },
+    });
+
+    if (!order) {
+      return errorResponse(res, "Order not found", 404);
+    }
+
+    if (order.service_status === OrderServiceStatus.COMPLETED) {
+      return errorResponse(res, "Completed order cannot be changed", 400);
+    }
+
+    if (order.service_status === OrderServiceStatus.CANCELLED) {
+      return errorResponse(res, "Cancelled order cannot be changed", 400);
+    }
+
+    if (order.service_status === null) {
+      return errorResponse(res, "Order has no service status", 400);
+    }
+
+    const currentStatus = order.service_status;
+
+    if (currentStatus === service_status) {
+      return errorResponse(res, `Order is already ${service_status}`, 400);
+    }
+
+    if (
+      currentStatus === OrderServiceStatus.WAITING &&
+      service_status === OrderServiceStatus.CONFIRMED
+    ) {
+      const updatedOrder = await prisma.orders.update({
+        where: {
+          id: orderId,
+        },
+        data: {
+          service_status: OrderServiceStatus.CONFIRMED,
+        },
+        include: orderInclude,
+      });
+
+      return successResponse(res, updatedOrder, "Order confirmed successfully");
+    }
+
+    if (
+      currentStatus === OrderServiceStatus.WAITING &&
+      service_status === OrderServiceStatus.IN_PROGRESS
+    ) {
+      return errorResponse(
+        res,
+        "Order must be confirmed before service can start",
+        400,
+      );
+    }
+
+    if (
+      currentStatus === OrderServiceStatus.CONFIRMED &&
+      service_status === OrderServiceStatus.IN_PROGRESS
+    ) {
+      if (order.payment_status !== PaymentStatus.PAID) {
+        return errorResponse(
+          res,
+          "Order must be paid before service can start",
+          400,
+        );
+      }
+
+      const updatedOrder = await prisma.orders.update({
+        where: {
+          id: orderId,
+        },
+        data: {
+          service_status: OrderServiceStatus.IN_PROGRESS,
+        },
+        include: orderInclude,
+      });
+
+      return successResponse(
+        res,
+        updatedOrder,
+        "Order service started successfully",
+      );
+    }
+
+    if (
+      currentStatus === OrderServiceStatus.CONFIRMED &&
+      service_status === OrderServiceStatus.COMPLETED
+    ) {
+      return errorResponse(
+        res,
+        "Only in-progress orders can be completed",
+        400,
+      );
+    }
+
+    if (
+      currentStatus === OrderServiceStatus.IN_PROGRESS &&
+      service_status === OrderServiceStatus.COMPLETED
+    ) {
+      if (order.payment_status !== PaymentStatus.PAID) {
+        return errorResponse(
+          res,
+          "Order must be paid before it can be completed",
+          400,
+        );
+      }
+
+      const updatedOrder = await prisma.orders.update({
+        where: {
+          id: orderId,
+        },
+        data: {
+          service_status: OrderServiceStatus.COMPLETED,
+        },
+        include: orderInclude,
+      });
+
+      return successResponse(res, updatedOrder, "Order completed successfully");
+    }
+
+    if (
+      currentStatus === OrderServiceStatus.IN_PROGRESS &&
+      service_status !== OrderServiceStatus.IN_PROGRESS
+    ) {
+      return errorResponse(
+        res,
+        "Order in progress cannot change to this status",
+        400,
+      );
+    }
+
+    return errorResponse(
+      res,
+      `Cannot change order status from ${currentStatus} to ${service_status}`,
+      400,
+    );
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const deleteOrder = async (
   req: Request,
@@ -667,19 +863,11 @@ export const deleteOrder = async (
   next: NextFunction,
 ) => {
   try {
-    const id = Number(req.params.id);
+    const id = parseId(req.params.id);
 
-    // =========================
-    // VALIDATE ID
-    // =========================
-
-    if (isNaN(id)) {
+    if (!id) {
       return errorResponse(res, "Invalid order id", 400);
     }
-
-    // =========================
-    // FIND ORDER
-    // =========================
 
     const existingOrder = await prisma.orders.findUnique({
       where: {
@@ -691,17 +879,21 @@ export const deleteOrder = async (
       return errorResponse(res, "Order not found", 404);
     }
 
-    // if (existingOrder.payment_status === "Paid") {
-    //   return errorResponse(
-    //     res,
-    //     "Order yang sudah dibayar tidak dapat dihapus",
-    //     400,
-    //   );
-    // }
+    if (existingOrder.payment_status === PaymentStatus.PAID) {
+      return errorResponse(
+        res,
+        "Order yang sudah dibayar tidak dapat dihapus",
+        400,
+      );
+    }
 
-    // =========================
-    // DELETE ORDER
-    // =========================
+    if (existingOrder.service_status === OrderServiceStatus.COMPLETED) {
+      return errorResponse(res, "Completed order cannot be deleted", 400);
+    }
+
+    if (existingOrder.service_status === OrderServiceStatus.CANCELLED) {
+      return errorResponse(res, "Cancelled order cannot be deleted", 400);
+    }
 
     await prisma.orders.delete({
       where: {
@@ -715,6 +907,142 @@ export const deleteOrder = async (
   }
 };
 
+export const cancelOrderByAdmin = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user) {
+      return errorResponse(res, "Unauthorized", 401);
+    }
+
+    if (req.user.role !== UserRole.ADMIN) {
+      return errorResponse(
+        res,
+        "Only admin can cancel orders through this endpoint",
+        403,
+      );
+    }
+
+    const orderId = parseId(req.params.id);
+
+    if (!orderId) {
+      return errorResponse(res, "Invalid order id", 400);
+    }
+
+    const order = await prisma.orders.findUnique({
+      where: {
+        id: orderId,
+      },
+    });
+
+    if (!order) {
+      return errorResponse(res, "Order not found", 404);
+    }
+
+    if (order.payment_status === PaymentStatus.PAID) {
+      return errorResponse(
+        res,
+        "Paid order cannot be cancelled. Please use the refund process.",
+        400,
+      );
+    }
+
+    if (order.service_status === null) {
+      return errorResponse(
+        res,
+        "Order cannot be cancelled because service status is null",
+        400,
+      );
+    }
+
+    const allowedStatuses: OrderServiceStatus[] = [
+      OrderServiceStatus.WAITING,
+      OrderServiceStatus.CONFIRMED,
+    ];
+
+    if (!allowedStatuses.includes(order.service_status)) {
+      return errorResponse(
+        res,
+        `Order cannot be cancelled. Current status: ${order.service_status}`,
+        400,
+      );
+    }
+
+    const updatedOrder = await prisma.orders.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        service_status: OrderServiceStatus.CANCELLED,
+      },
+      include: orderInclude,
+    });
+
+    return successResponse(res, updatedOrder, "Order cancelled successfully");
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const completeOrder = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user) {
+      return errorResponse(res, "Unauthorized", 401);
+    }
+
+    const orderId = parseId(req.params.id);
+
+    if (!orderId) {
+      return errorResponse(res, "Invalid order id", 400);
+    }
+
+    const order = await prisma.orders.findUnique({
+      where: {
+        id: orderId,
+      },
+    });
+
+    if (!order) {
+      return errorResponse(res, "Order not found", 404);
+    }
+
+    if (order.payment_status !== PaymentStatus.PAID) {
+      return errorResponse(
+        res,
+        "Order must be paid before it can be completed",
+        400,
+      );
+    }
+
+    if (order.service_status !== OrderServiceStatus.IN_PROGRESS) {
+      return errorResponse(
+        res,
+        `Only in-progress orders can be completed. Current status: ${order.service_status}`,
+        400,
+      );
+    }
+
+    const updatedOrder = await prisma.orders.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        service_status: OrderServiceStatus.COMPLETED,
+      },
+      include: orderInclude,
+    });
+
+    return successResponse(res, updatedOrder, "Order completed successfully");
+  } catch (err) {
+    next(err);
+  }
+};
 export const createOrderByCustomer = async (
   req: AuthRequest,
   res: Response,
@@ -725,14 +1053,16 @@ export const createOrderByCustomer = async (
       return errorResponse(res, "Unauthorized", 401);
     }
 
-    if (req.user.role !== "Customer") {
+    if (req.user.role !== UserRole.CUSTOMER) {
       return errorResponse(res, "Only customer can access this endpoint", 403);
     }
 
-    const { vehicle_id, items } = req.body;
+    const { vehicle_id, items, check_in_time } = req.body;
 
-    if (!vehicle_id || !Array.isArray(items) || items.length === 0) {
-      return errorResponse(res, "Vehicle and services are required", 400);
+    const vehicleId = Number(vehicle_id);
+
+    if (!Number.isInteger(vehicleId) || vehicleId <= 0) {
+      return errorResponse(res, "Valid vehicle is required", 400);
     }
 
     const customer = await prisma.customers.findUnique({
@@ -745,106 +1075,114 @@ export const createOrderByCustomer = async (
       return errorResponse(res, "Customer profile not found", 404);
     }
 
-    const vehicle = await prisma.vehicles.findUnique({
+    if (customer.deleted_at) {
+      return errorResponse(res, "Customer profile is inactive", 400);
+    }
+
+    const vehicle = await prisma.vehicles.findFirst({
       where: {
-        id: Number(vehicle_id),
+        id: vehicleId,
+        customer_id: customer.id,
+        deleted_at: null,
       },
     });
 
     if (!vehicle) {
-      return errorResponse(res, "Vehicle not found", 404);
-    }
-
-    if (vehicle.customer_id !== customer.id) {
-      return errorResponse(res, "Vehicle does not belong to you", 403);
-    }
-
-    const serviceIds = [
-      ...new Set(
-        items.map((item: { service_id: number }) => Number(item.service_id)),
-      ),
-    ];
-
-    const services = await prisma.services.findMany({
-      where: {
-        id: { in: serviceIds },
-        deleted_at: null,
-        status: "Active",
-      },
-    });
-
-    if (services.length !== serviceIds.length) {
       return errorResponse(
         res,
-        "One or more services not found or inactive",
+        "Vehicle not found or does not belong to you",
         404,
       );
     }
 
-    for (const item of items) {
-      const qty = Number(item.qty);
+    const finalCheckInTime = validateCheckInTime(check_in_time);
 
-      if (!Number.isInteger(qty) || qty <= 0) {
-        return errorResponse(
-          res,
-          "Service quantity must be greater than 0",
-          400,
-        );
-      }
+    if (check_in_time !== undefined && finalCheckInTime === null) {
+      return errorResponse(res, "Check-in time must use HH:mm format", 400);
     }
 
-    const orderItems = items.map(
-      (item: { service_id: number; qty: number }) => {
-        const service = services.find((s) => s.id === Number(item.service_id))!;
-        const qty = Number(item.qty);
+    let orderItems: OrderItemInput[] | null;
 
-        return {
-          service_id: Number(item.service_id),
-          qty,
-          subtotal: Number(service.price) * qty,
-        };
+    try {
+      orderItems = await getValidatedServices(items);
+    } catch (err) {
+      if (err instanceof Error) {
+        if (err.message === "INVALID_SERVICE_ID") {
+          return errorResponse(res, "Invalid service id", 400);
+        }
+
+        if (err.message === "SERVICE_NOT_FOUND") {
+          return errorResponse(
+            res,
+            "One or more services not found or inactive",
+            404,
+          );
+        }
+
+        if (err.message === "INACTIVE_SERVICE") {
+          return errorResponse(res, "One or more services are inactive", 400);
+        }
+
+        if (err.message === "INVALID_QUANTITY") {
+          return errorResponse(
+            res,
+            "Service quantity must be greater than 0",
+            400,
+          );
+        }
+      }
+
+      throw err;
+    }
+
+    if (!orderItems || orderItems.length === 0) {
+      return errorResponse(res, "At least one service is required", 400);
+    }
+
+    const order = await prisma.orders.create({
+      data: {
+        customer_id: customer.id,
+        vehicle_id: vehicle.id,
+        staff_id: null,
+        service_status: OrderServiceStatus.WAITING,
+        payment_status: PaymentStatus.UNPAID,
+        check_in_time: finalCheckInTime,
+        order_items: {
+          create: orderItems,
+        },
       },
-    );
-
-    const order = await prisma.$transaction(async (tx) => {
-      return tx.orders.create({
-        data: {
-          customer_id: customer.id,
-          vehicle_id: Number(vehicle_id),
-          staff_id: null,
-          service_status: "Waiting",
-          payment_status: "Unpaid",
-          check_in_time: null,
-          order_items: {
-            create: orderItems,
+      include: {
+        customers: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
           },
         },
-        include: {
-          customers: {
-            select: {
-              id: true,
-              name: true,
-              phone: true,
-            },
-          },
-          vehicles: true,
-          order_items: {
-            include: {
-              services: {
-                select: {
-                  id: true,
-                  name: true,
-                  price: true,
-                  duration: true,
-                },
+        vehicles: true,
+        order_items: {
+          include: {
+            services: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+                duration: true,
               },
             },
           },
         },
-      });
+        invoices: true,
+        payments: true,
+      },
     });
 
-    return successResponse(res, order, "Order created successfully", 201);
+    return successResponse(
+      res,
+      order,
+      "Order created successfully. Please complete payment before service starts.",
+      201,
+    );
   } catch (err) {
     next(err);
   }
@@ -860,12 +1198,14 @@ export const getMyOrders = async (
       return errorResponse(res, "Unauthorized", 401);
     }
 
-    if (req.user.role !== "Customer") {
+    if (req.user.role !== UserRole.CUSTOMER) {
       return errorResponse(res, "Only customer can access this endpoint", 403);
     }
 
     const customer = await prisma.customers.findUnique({
-      where: { user_id: req.user.id },
+      where: {
+        user_id: req.user.id,
+      },
     });
 
     if (!customer) {
@@ -894,10 +1234,123 @@ export const getMyOrders = async (
           },
         },
         invoices: true,
+        payments: true,
       },
     });
 
     return successResponse(res, orders, "My orders retrieved successfully");
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const cancelOrderByCustomer = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user) {
+      return errorResponse(res, "Unauthorized", 401);
+    }
+
+    if (req.user.role !== UserRole.CUSTOMER) {
+      return errorResponse(res, "Only customer can access this endpoint", 403);
+    }
+
+    const orderId = parseId(req.params.id);
+
+    if (!orderId) {
+      return errorResponse(res, "Invalid order id", 400);
+    }
+
+    const customer = await prisma.customers.findUnique({
+      where: {
+        user_id: req.user.id,
+      },
+    });
+
+    if (!customer) {
+      return errorResponse(res, "Customer profile not found", 404);
+    }
+
+    const order = await prisma.orders.findFirst({
+      where: {
+        id: orderId,
+        customer_id: customer.id,
+      },
+    });
+
+    if (!order) {
+      return errorResponse(res, "Order not found", 404);
+    }
+
+    if (order.payment_status === PaymentStatus.PAID) {
+      return errorResponse(res, "Paid order cannot be cancelled", 400);
+    }
+
+    if (order.service_status === null) {
+      return errorResponse(
+        res,
+        "Order cannot be cancelled because service status is null",
+        400,
+      );
+    }
+
+    const allowedStatuses: OrderServiceStatus[] = [
+      OrderServiceStatus.WAITING,
+      OrderServiceStatus.CONFIRMED,
+    ];
+
+    if (!allowedStatuses.includes(order.service_status)) {
+      return errorResponse(
+        res,
+        `Order cannot be cancelled. Current status: ${order.service_status}`,
+        400,
+      );
+    }
+
+    const updatedOrder = await prisma.orders.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        service_status: OrderServiceStatus.CANCELLED,
+      },
+      include: {
+        customers: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+          },
+        },
+        vehicles: {
+          select: {
+            id: true,
+            plate_number: true,
+            brand: true,
+            model: true,
+          },
+        },
+        order_items: {
+          include: {
+            services: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+                duration: true,
+              },
+            },
+          },
+        },
+        invoices: true,
+        payments: true,
+      },
+    });
+
+    return successResponse(res, updatedOrder, "Booking successfully cancelled");
   } catch (err) {
     next(err);
   }
