@@ -1,11 +1,18 @@
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/prisma";
 import { successResponse, errorResponse } from "../utils/response";
+import { AuthRequest } from "../middlewares/auth.middleware";
 import {
   OrderServiceStatus,
   PaymentMethod,
   PaymentStatus,
+  UserRole,
 } from "../../generated/prisma/enums";
+import {
+  createPaymentTransaction,
+  handleMidtransNotification,
+  verifyPaymentByOrderId,
+} from "../services/payment.service";
 
 const parseId = (value: unknown): number | null => {
   const id = Number(value);
@@ -222,6 +229,112 @@ export const createPayment = async (
   }
 };
 
+export const createMidtransPayment = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const orderId = parseId(req.params.orderId);
+
+    if (!orderId) {
+      return errorResponse(res, "Invalid order id", 400);
+    }
+
+    if (req.user?.role === UserRole.CUSTOMER) {
+      const customer = await prisma.customers.findUnique({
+        where: {
+          user_id: req.user.id,
+        },
+      });
+
+      if (!customer) {
+        return errorResponse(res, "Customer profile not found", 404);
+      }
+
+      const order = await prisma.orders.findUnique({
+        where: {
+          id: orderId,
+        },
+      });
+
+      if (!order) {
+        return errorResponse(res, "Order not found", 404);
+      }
+
+      if (order.customer_id !== customer.id) {
+        return errorResponse(
+          res,
+          "You are not allowed to pay for this order",
+          403,
+        );
+      }
+    }
+
+    const payment = await createPaymentTransaction(orderId);
+
+    return successResponse(
+      res,
+      payment,
+      "Midtrans payment created successfully",
+      200,
+    );
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const verifyMidtransPayment = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const orderId = parseId(req.params.orderId);
+
+    if (!orderId) {
+      return errorResponse(res, "Invalid order id", 400);
+    }
+
+    const midtransOrderId =
+      typeof req.body?.midtrans_order_id === "string"
+        ? req.body.midtrans_order_id
+        : undefined;
+
+    const result = await verifyPaymentByOrderId(orderId, midtransOrderId);
+
+    return successResponse(res, result, "Payment verified successfully", 200);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const midtransNotification = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    console.log("\n========================================================");
+    console.log("🔔 [MIDTRANS NOTIFICATION WEBHOOK RECEIVED]");
+    console.log("Time:", new Date().toLocaleString("id-ID"));
+    console.log("Headers:", JSON.stringify(req.headers, null, 2));
+    console.log("Body:", JSON.stringify(req.body, null, 2));
+    console.log("========================================================\n");
+
+    const result = await handleMidtransNotification(req.body);
+
+    return successResponse(
+      res,
+      result,
+      "Midtrans notification processed successfully",
+    );
+  } catch (err: any) {
+    console.error("❌ [MIDTRANS NOTIFICATION ERROR]:", err?.message || err);
+    next(err);
+  }
+};
+
 export const getPayments = async (
   req: Request,
   res: Response,
@@ -240,6 +353,7 @@ export const getPayments = async (
         : typeof req.query.q === "string"
           ? req.query.q.trim()
           : "";
+
     const paymentMethod = req.query.payment_method as PaymentMethod | undefined;
 
     const where: any = {
@@ -247,24 +361,38 @@ export const getPayments = async (
         isValidEnumValue(PaymentMethod, paymentMethod) && {
           payment_method: paymentMethod,
         }),
+
       ...(search && {
         OR: [
           {
             orders: {
-              customers: { name: { contains: search, mode: "insensitive" } },
+              customers: {
+                name: {
+                  contains: search,
+                  mode: "insensitive",
+                },
+              },
             },
           },
           {
             orders: {
               vehicles: {
-                plate_number: { contains: search, mode: "insensitive" },
+                plate_number: {
+                  contains: search,
+                  mode: "insensitive",
+                },
               },
             },
           },
           {
             orders: {
               invoices: {
-                some: { invoice_no: { contains: search, mode: "insensitive" } },
+                some: {
+                  invoice_no: {
+                    contains: search,
+                    mode: "insensitive",
+                  },
+                },
               },
             },
           },
@@ -297,7 +425,9 @@ export const getPayments = async (
         },
       }),
 
-      prisma.payments.count({ where }),
+      prisma.payments.count({
+        where,
+      }),
     ]);
 
     const totalPages = Math.ceil(total / limit);

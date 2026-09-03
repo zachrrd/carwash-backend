@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { AuthRequest } from "../middlewares/auth.middleware";
 import { prisma } from "../config/prisma";
 import { successResponse, errorResponse } from "../utils/response";
 import bcrypt from "bcrypt";
@@ -375,6 +376,130 @@ export const createCustomerAccount = async (
       result,
       "Customer account created successfully",
       201,
+    );
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateMyProfile = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user?.id) {
+      return errorResponse(res, "Unauthorized", 401);
+    }
+
+    const userId = req.user.id;
+
+    const { name, email, phone } = req.body;
+
+    const trimmedName =
+      typeof name === "string" ? name.trim() : "";
+
+    const normalizedEmail =
+      typeof email === "string"
+        ? email.trim().toLowerCase()
+        : "";
+
+    const trimmedPhone =
+      typeof phone === "string" ? phone.trim() : "";
+
+    if (!trimmedName) {
+      return errorResponse(res, "Name is required", 400);
+    }
+
+    if (!normalizedEmail) {
+      return errorResponse(res, "Email is required", 400);
+    }
+
+    if (!trimmedPhone) {
+      return errorResponse(res, "Phone is required", 400);
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(normalizedEmail)) {
+      return errorResponse(res, "Invalid email format", 400);
+    }
+
+
+    const user = await prisma.users.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        customer: true,
+      },
+    });
+
+    if (!user) {
+      return errorResponse(res, "User not found", 404);
+    }
+
+    if (!user.customer) {
+      return errorResponse(res, "Customer profile not found", 404);
+    }
+
+    // INI YANG TADI HILANG
+    const customerId = user.customer.id;
+
+    const existingEmail = await prisma.users.findUnique({
+      where: {
+        email: normalizedEmail,
+      },
+    });
+
+    if (existingEmail && existingEmail.id !== userId) {
+      return errorResponse(res, "Email already registered", 409);
+    }
+
+
+    const result = await prisma.$transaction(async (tx) => {
+      const updatedUser = await tx.users.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          name: trimmedName,
+          email: normalizedEmail,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      });
+
+      const updatedCustomer = await tx.customers.update({
+        where: {
+          id: customerId,
+        },
+        data: {
+          name: trimmedName,
+          phone: trimmedPhone,
+        },
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+          user_id: true,
+        },
+      });
+
+      return {
+        ...updatedUser,
+        customer: updatedCustomer,
+      };
+    });
+
+    return successResponse(
+      res,
+      result,
+      "Profile updated successfully",
     );
   } catch (err) {
     next(err);

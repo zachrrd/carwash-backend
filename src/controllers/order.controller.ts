@@ -9,13 +9,34 @@ import {
   UserRole,
 } from "../../generated/prisma/enums";
 
+import { getSocketIO } from "../config/socket";
+
+const emitOrderStatusUpdate = (order: {
+  id: number;
+  service_status: OrderServiceStatus | null;
+  [key: string]: any;
+}) => {
+  try {
+    const io = getSocketIO();
+    const payload = {
+      orderId: order.id,
+      serviceStatus: order.service_status,
+      order,
+    };
+    io.to(`order:${order.id}`).emit("order-status-updated", payload);
+    io.to("orders").emit("order-status-updated", payload);
+  } catch (err) {
+    console.error("Socket emit error:", err);
+  }
+};
+
 interface OrderItemInput {
   service_id: number;
   qty: number;
   subtotal: number;
 }
 
-const parseId = (value: string | string[] | undefined): number | null => {
+const parseId = (value: unknown): number | null => {
   if (typeof value !== "string") {
     return null;
   }
@@ -140,6 +161,32 @@ const getValidatedServices = async (
   return orderItems;
 };
 
+const handleServiceValidationError = (
+  res: Response,
+  err: unknown,
+): Response | null => {
+  if (!(err instanceof Error)) {
+    return null;
+  }
+
+  switch (err.message) {
+    case "INVALID_SERVICE_ID":
+      return errorResponse(res, "Invalid service id", 400);
+
+    case "SERVICE_NOT_FOUND":
+      return errorResponse(res, "One or more services not found", 404);
+
+    case "INACTIVE_SERVICE":
+      return errorResponse(res, "One or more services are inactive", 400);
+
+    case "INVALID_QUANTITY":
+      return errorResponse(res, "Service quantity must be greater than 0", 400);
+
+    default:
+      return null;
+  }
+};
+
 export const getAllOrders = async (
   req: Request,
   res: Response,
@@ -156,45 +203,99 @@ export const getAllOrders = async (
         : typeof req.query.q === "string"
           ? req.query.q.trim()
           : "";
-    const serviceStatus = req.query.service_status as
-      | OrderServiceStatus
-      | undefined;
-    const paymentStatus = req.query.payment_status as PaymentStatus | undefined;
+
+    const serviceStatus =
+      typeof req.query.service_status === "string"
+        ? req.query.service_status
+        : undefined;
+
+    const paymentStatus =
+      typeof req.query.payment_status === "string"
+        ? req.query.payment_status
+        : undefined;
+
     const customerId = req.query.customer_id
       ? Number(req.query.customer_id)
       : undefined;
+
     const staffId = req.query.staff_id ? Number(req.query.staff_id) : undefined;
 
-    const where: any = {
-      ...(serviceStatus &&
-        isValidEnumValue(OrderServiceStatus, serviceStatus) && {
-          service_status: serviceStatus,
-        }),
-      ...(paymentStatus &&
-        isValidEnumValue(PaymentStatus, paymentStatus) && {
-          payment_status: paymentStatus,
-        }),
-      ...(customerId && { customer_id: customerId }),
-      ...(staffId && { staff_id: staffId }),
-      ...(search && {
-        OR: [
-          { customers: { name: { contains: search, mode: "insensitive" } } },
-          { customers: { phone: { contains: search, mode: "insensitive" } } },
-          {
-            vehicles: {
-              plate_number: { contains: search, mode: "insensitive" },
+    const where: any = {};
+
+    if (serviceStatus && isValidEnumValue(OrderServiceStatus, serviceStatus)) {
+      where.service_status = serviceStatus;
+    }
+
+    if (paymentStatus && isValidEnumValue(PaymentStatus, paymentStatus)) {
+      where.payment_status = paymentStatus;
+    }
+
+    if (
+      customerId !== undefined &&
+      Number.isInteger(customerId) &&
+      customerId > 0
+    ) {
+      where.customer_id = customerId;
+    }
+
+    if (staffId !== undefined && Number.isInteger(staffId) && staffId > 0) {
+      where.staff_id = staffId;
+    }
+
+    if (search) {
+      where.OR = [
+        {
+          customers: {
+            name: {
+              contains: search,
+              mode: "insensitive",
             },
           },
-          { vehicles: { brand: { contains: search, mode: "insensitive" } } },
-          { vehicles: { model: { contains: search, mode: "insensitive" } } },
-          {
-            invoices: {
-              some: { invoice_no: { contains: search, mode: "insensitive" } },
+        },
+        {
+          customers: {
+            phone: {
+              contains: search,
+              mode: "insensitive",
             },
           },
-        ],
-      }),
-    };
+        },
+        {
+          vehicles: {
+            plate_number: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        },
+        {
+          vehicles: {
+            brand: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        },
+        {
+          vehicles: {
+            model: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        },
+        {
+          invoices: {
+            some: {
+              invoice_no: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+          },
+        },
+      ];
+    }
 
     const [orders, total] = await Promise.all([
       prisma.orders.findMany({
@@ -206,7 +307,10 @@ export const getAllOrders = async (
         },
         include: orderInclude,
       }),
-      prisma.orders.count({ where }),
+
+      prisma.orders.count({
+        where,
+      }),
     ]);
 
     return successResponse(
@@ -367,26 +471,10 @@ export const createOrder = async (
     try {
       orderItems = await getValidatedServices(items);
     } catch (err) {
-      if (err instanceof Error) {
-        if (err.message === "INVALID_SERVICE_ID") {
-          return errorResponse(res, "Invalid service id", 400);
-        }
+      const response = handleServiceValidationError(res, err);
 
-        if (err.message === "SERVICE_NOT_FOUND") {
-          return errorResponse(res, "One or more services not found", 404);
-        }
-
-        if (err.message === "INACTIVE_SERVICE") {
-          return errorResponse(res, "One or more services are inactive", 400);
-        }
-
-        if (err.message === "INVALID_QUANTITY") {
-          return errorResponse(
-            res,
-            "Service quantity must be greater than 0",
-            400,
-          );
-        }
+      if (response) {
+        return response;
       }
 
       throw err;
@@ -473,17 +561,26 @@ export const updateOrder = async (
     }
 
     if (existingOrder.payment_status === PaymentStatus.PAID) {
-      const tryingToChangeOrderData =
-        customer_id !== undefined ||
-        vehicle_id !== undefined ||
-        staff_id !== undefined ||
-        check_in_time !== undefined ||
-        items !== undefined;
+      const isCustomerChanged =
+        customer_id !== undefined &&
+        Number(customer_id) !== existingOrder.customer_id;
+      const isVehicleChanged =
+        vehicle_id !== undefined &&
+        Number(vehicle_id) !== existingOrder.vehicle_id;
+      const isCheckInChanged =
+        check_in_time !== undefined &&
+        check_in_time !== existingOrder.check_in_time;
+      const isItemsChanged = items !== undefined;
 
-      if (tryingToChangeOrderData) {
+      if (
+        isCustomerChanged ||
+        isVehicleChanged ||
+        isCheckInChanged ||
+        isItemsChanged
+      ) {
         return errorResponse(
           res,
-          "Paid order cannot modify customer, vehicle, staff, check-in time, or services",
+          "Paid order cannot modify customer, vehicle, check-in time, or services",
           400,
         );
       }
@@ -539,10 +636,7 @@ export const updateOrder = async (
 
     let finalStaffId = existingOrder.staff_id;
 
-    if (
-      existingOrder.payment_status !== PaymentStatus.PAID &&
-      staff_id !== undefined
-    ) {
+    if (staff_id !== undefined) {
       if (staff_id === null) {
         finalStaffId = null;
       } else {
@@ -603,26 +697,10 @@ export const updateOrder = async (
 
         orderItems = validatedItems;
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message === "INVALID_SERVICE_ID") {
-            return errorResponse(res, "Invalid service id", 400);
-          }
+        const response = handleServiceValidationError(res, err);
 
-          if (err.message === "SERVICE_NOT_FOUND") {
-            return errorResponse(res, "One or more services not found", 404);
-          }
-
-          if (err.message === "INACTIVE_SERVICE") {
-            return errorResponse(res, "One or more services are inactive", 400);
-          }
-
-          if (err.message === "INVALID_QUANTITY") {
-            return errorResponse(
-              res,
-              "Service quantity must be greater than 0",
-              400,
-            );
-          }
+        if (response) {
+          return response;
         }
 
         throw err;
@@ -747,6 +825,14 @@ export const updateOrderStatus = async (
       currentStatus === OrderServiceStatus.WAITING &&
       service_status === OrderServiceStatus.CONFIRMED
     ) {
+      if (!order.staff_id) {
+        return errorResponse(
+          res,
+          "Order must have a staff assigned before it can be confirmed",
+          400,
+        );
+      }
+
       const updatedOrder = await prisma.orders.update({
         where: {
           id: orderId,
@@ -756,6 +842,8 @@ export const updateOrderStatus = async (
         },
         include: orderInclude,
       });
+
+      emitOrderStatusUpdate(updatedOrder);
 
       return successResponse(res, updatedOrder, "Order confirmed successfully");
     }
@@ -775,6 +863,14 @@ export const updateOrderStatus = async (
       currentStatus === OrderServiceStatus.CONFIRMED &&
       service_status === OrderServiceStatus.IN_PROGRESS
     ) {
+      if (!order.staff_id) {
+        return errorResponse(
+          res,
+          "Order must have a staff assigned before service can start",
+          400,
+        );
+      }
+
       if (order.payment_status !== PaymentStatus.PAID) {
         return errorResponse(
           res,
@@ -792,6 +888,8 @@ export const updateOrderStatus = async (
         },
         include: orderInclude,
       });
+
+      emitOrderStatusUpdate(updatedOrder);
 
       return successResponse(
         res,
@@ -832,6 +930,8 @@ export const updateOrderStatus = async (
         },
         include: orderInclude,
       });
+
+      emitOrderStatusUpdate(updatedOrder);
 
       return successResponse(res, updatedOrder, "Order completed successfully");
     }
@@ -980,6 +1080,8 @@ export const cancelOrderByAdmin = async (
       include: orderInclude,
     });
 
+    emitOrderStatusUpdate(updatedOrder);
+
     return successResponse(res, updatedOrder, "Order cancelled successfully");
   } catch (err) {
     next(err);
@@ -1038,11 +1140,14 @@ export const completeOrder = async (
       include: orderInclude,
     });
 
+    emitOrderStatusUpdate(updatedOrder);
+
     return successResponse(res, updatedOrder, "Order completed successfully");
   } catch (err) {
     next(err);
   }
 };
+
 export const createOrderByCustomer = async (
   req: AuthRequest,
   res: Response,
@@ -1106,30 +1211,10 @@ export const createOrderByCustomer = async (
     try {
       orderItems = await getValidatedServices(items);
     } catch (err) {
-      if (err instanceof Error) {
-        if (err.message === "INVALID_SERVICE_ID") {
-          return errorResponse(res, "Invalid service id", 400);
-        }
+      const response = handleServiceValidationError(res, err);
 
-        if (err.message === "SERVICE_NOT_FOUND") {
-          return errorResponse(
-            res,
-            "One or more services not found or inactive",
-            404,
-          );
-        }
-
-        if (err.message === "INACTIVE_SERVICE") {
-          return errorResponse(res, "One or more services are inactive", 400);
-        }
-
-        if (err.message === "INVALID_QUANTITY") {
-          return errorResponse(
-            res,
-            "Service quantity must be greater than 0",
-            400,
-          );
-        }
+      if (response) {
+        return response;
       }
 
       throw err;
@@ -1349,6 +1434,8 @@ export const cancelOrderByCustomer = async (
         payments: true,
       },
     });
+
+    emitOrderStatusUpdate(updatedOrder);
 
     return successResponse(res, updatedOrder, "Booking successfully cancelled");
   } catch (err) {
