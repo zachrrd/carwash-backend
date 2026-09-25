@@ -1,7 +1,8 @@
 import { Response, NextFunction } from "express";
+import { UserRole } from "../../generated/prisma/enums";
 import { AuthRequest } from "./auth.middleware";
 
-export const authorizeRoles = (...allowedRoles: string[]) => {
+export const authorizeRoles = (...allowedRoles: UserRole[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({

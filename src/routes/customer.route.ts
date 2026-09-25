@@ -1,25 +1,83 @@
 import { Router } from "express";
 
 import {
-    getAllCustomers,
-    getDeletedCustomers,
-    getCustomerById,
-    createCustomer,
-    updateCustomer,
-    restoreCustomer,
-    deleteCustomer,
+  getAllCustomers,
+  getDeletedCustomers,
+  getCustomerById,
+  createCustomer,
+  updateCustomer,
+  restoreCustomer,
+  deleteCustomer,
+  createCustomerAccount,
+  updateMyProfile,
 } from "../controllers/customer.controller";
+
 import { authenticateToken } from "../middlewares/auth.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 
 const router = Router();
 
-router.get("/",authenticateToken, authorizeRoles("Admin", "Cashier"), getAllCustomers);
-router.get("/trash/list", authenticateToken, authorizeRoles("Admin", "Cashier"), getDeletedCustomers);
-router.get("/:id",authenticateToken, authorizeRoles("Admin", "Cashier"), getCustomerById);
-router.post("/",authenticateToken, authorizeRoles("Admin", "Cashier"), createCustomer);
-router.put("/:id",authenticateToken, authorizeRoles("Admin", "Cashier"), updateCustomer);
-router.patch("/:id/restore", authenticateToken, authorizeRoles("Admin", "Cashier"), restoreCustomer);
-router.delete("/:id",authenticateToken, authorizeRoles("Admin", "Cashier"), deleteCustomer);
+router.put(
+  "/me",
+  authenticateToken,
+  authorizeRoles("CUSTOMER"),
+  updateMyProfile,
+);
+
+router.get(
+  "/",
+  authenticateToken,
+  authorizeRoles("ADMIN", "CASHIER"),
+  getAllCustomers,
+);
+
+router.get(
+  "/trash/list",
+  authenticateToken,
+  authorizeRoles("ADMIN", "CASHIER"),
+  getDeletedCustomers,
+);
+
+router.get(
+  "/:id",
+  authenticateToken,
+  authorizeRoles("ADMIN", "CASHIER"),
+  getCustomerById,
+);
+
+router.post(
+  "/",
+  authenticateToken,
+  authorizeRoles("ADMIN", "CASHIER"),
+  createCustomer,
+);
+
+router.put(
+  "/:id",
+  authenticateToken,
+  authorizeRoles("ADMIN", "CASHIER"),
+  updateCustomer,
+);
+
+router.patch(
+  "/:id/restore",
+  authenticateToken,
+  authorizeRoles("ADMIN", "CASHIER"),
+  restoreCustomer,
+);
+
+router.delete(
+  "/:id",
+  authenticateToken,
+  authorizeRoles("ADMIN", "CASHIER"),
+  deleteCustomer,
+);
+
+router.post(
+  "/:id/account",
+  authenticateToken,
+  authorizeRoles("ADMIN"),
+  createCustomerAccount,
+);
 
 export default router;

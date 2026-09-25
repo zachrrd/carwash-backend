@@ -1,12 +1,19 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { UserRole } from "../../generated/prisma/enums";
 
 export interface AuthRequest extends Request {
   user?: {
     id: number;
     email: string;
-    role: string;
+    role: UserRole;
   };
+}
+
+interface JwtPayload {
+  id: number;
+  email: string;
+  role: UserRole;
 }
 
 export const authenticateToken = (
@@ -24,20 +31,19 @@ export const authenticateToken = (
       });
     }
 
-    const token = authHeader.split(" ")[1];
+    const [scheme, token] = authHeader.split(" ");
 
-    if (!token) {
+    if (scheme !== "Bearer" || !token) {
       return res.status(401).json({
         success: false,
         message: "Invalid authorization format",
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
-      id: number;
-      email: string;
-      role: string;
-    };
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string,
+    ) as JwtPayload;
 
     req.user = decoded;
 

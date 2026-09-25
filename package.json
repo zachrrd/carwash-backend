@@ -1,17 +1,32 @@
 {
-  "name": "backend",
+  "name": "carwash-management-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Production-grade REST & WebSocket API for Car Wash Management System with Midtrans Payment Gateway, Prisma ORM, and Role-Based Access Control",
+  "main": "src/index.ts",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "tsx prisma/seed.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "carwash",
+    "express",
+    "typescript",
+    "prisma",
+    "postgresql",
+    "socket.io",
+    "midtrans",
+    "jwt",
+    "rest-api"
+  ],
+  "author": "Zacharia",
+  "license": "MIT",
   "type": "commonjs",
   "dependencies": {
+    "@imagekit/nodejs": "^7.11.0",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "bcrypt": "^6.0.0",
@@ -19,14 +34,21 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "pg": "^8.22.0"
+    "midtrans-client": "^1.4.3",
+    "multer": "^2.2.0",
+    "pdfkit": "^0.20.2",
+    "pg": "^8.22.0",
+    "socket.io": "^4.8.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.2.0",
     "@types/node": "^26.1.2",
+    "@types/pdfkit": "^0.17.6",
     "prisma": "^7.9.1",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.23.8",

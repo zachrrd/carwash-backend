@@ -7,52 +7,78 @@ import {
   updateVehicle,
   restoreVehicle,
   deleteVehicle,
+  getMyVehicles,
+  createVehicleByCustomer,
+  updateVehicleByCustomer,
+  deleteVehicleByCustomer,
 } from "../controllers/vehicle.controller";
 import { authenticateToken } from "../middlewares/auth.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 
 const router = Router();
 
+router.get("/my", authenticateToken, authorizeRoles("CUSTOMER"), getMyVehicles);
+router.post(
+  "/my",
+  authenticateToken,
+  authorizeRoles("CUSTOMER"),
+  createVehicleByCustomer,
+);
+
+router.put(
+  "/my/:id",
+  authenticateToken,
+  authorizeRoles("CUSTOMER"),
+  updateVehicleByCustomer,
+);
+
+router.delete(
+  "/my/:id",
+  authenticateToken,
+  authorizeRoles("CUSTOMER"),
+  deleteVehicleByCustomer,
+);
+
 router.get(
   "/",
   authenticateToken,
-  authorizeRoles("Admin", "Cashier"),
+  authorizeRoles("ADMIN", "CASHIER"),
   getAllVehicles,
 );
 router.get(
   "/trash/list",
   authenticateToken,
-  authorizeRoles("Admin", "Cashier"),
+  authorizeRoles("ADMIN", "CASHIER"),
   getDeletedVehicles,
 );
 router.get(
   "/:id",
   authenticateToken,
-  authorizeRoles("Admin", "Cashier"),
+  authorizeRoles("ADMIN", "CASHIER"),
   getVehicleById,
 );
 router.post(
   "/",
   authenticateToken,
-  authorizeRoles("Admin", "Cashier"),
+  authorizeRoles("ADMIN", "CASHIER"),
   createVehicle,
 );
 router.put(
   "/:id",
   authenticateToken,
-  authorizeRoles("Admin", "Cashier"),
+  authorizeRoles("ADMIN", "CASHIER"),
   updateVehicle,
 );
 router.patch(
   "/:id/restore",
   authenticateToken,
-  authorizeRoles("Admin", "Cashier"),
+  authorizeRoles("ADMIN", "CASHIER"),
   restoreVehicle,
 );
 router.delete(
   "/:id",
   authenticateToken,
-  authorizeRoles("Admin", "Cashier"),
+  authorizeRoles("ADMIN", "CASHIER"),
   deleteVehicle,
 );
 

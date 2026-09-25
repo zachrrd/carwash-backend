@@ -28,15 +28,15 @@ export type users = Prisma.usersModel
  */
 export type customers = Prisma.customersModel
 /**
- * Model vehicles
- * 
- */
-export type vehicles = Prisma.vehiclesModel
-/**
  * Model staffs
  * 
  */
 export type staffs = Prisma.staffsModel
+/**
+ * Model vehicles
+ * 
+ */
+export type vehicles = Prisma.vehiclesModel
 /**
  * Model services
  * 

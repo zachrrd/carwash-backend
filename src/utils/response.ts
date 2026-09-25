@@ -16,10 +16,12 @@ export const successResponse = (
 export const errorResponse = (
   res: Response,
   message = "Server Error",
-  statusCode = 500
+  statusCode = 500,
+  errors?: { field: string; message: string }[] | any,
 ) => {
   return res.status(statusCode).json({
     success: false,
     message,
+    ...(errors && { errors }),
   });
 };

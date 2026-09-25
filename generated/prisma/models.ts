@@ -10,8 +10,8 @@
  */
 export type * from './models/users.js'
 export type * from './models/customers.js'
-export type * from './models/vehicles.js'
 export type * from './models/staffs.js'
+export type * from './models/vehicles.js'
 export type * from './models/services.js'
 export type * from './models/orders.js'
 export type * from './models/order_items.js'
