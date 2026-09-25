@@ -1,15 +1,29 @@
 {
-  "name": "backend",
+  "name": "carwash-management-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Production-grade REST & WebSocket API for Car Wash Management System with Midtrans Payment Gateway, Prisma ORM, and Role-Based Access Control",
+  "main": "src/index.ts",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "tsx prisma/seed.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "carwash",
+    "express",
+    "typescript",
+    "prisma",
+    "postgresql",
+    "socket.io",
+    "midtrans",
+    "jwt",
+    "rest-api"
+  ],
+  "author": "Zacharia",
+  "license": "MIT",
   "type": "commonjs",
   "dependencies": {
     "@imagekit/nodejs": "^7.11.0",

@@ -7,3 +7,12 @@ dist/
 
 *.log
 .DS_Store
+
+# AI Assistant configs & skills cache
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
+
+# Local Uploads
+uploads/
