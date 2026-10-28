@@ -57,9 +57,11 @@ export const ModelName = {
   vehicles: 'vehicles',
   services: 'services',
   orders: 'orders',
+  order_staff: 'order_staff',
   order_items: 'order_items',
   payments: 'payments',
-  invoices: 'invoices'
+  invoices: 'invoices',
+  payment_attempts: 'payment_attempts'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -154,11 +156,20 @@ export const OrdersScalarFieldEnum = {
   payment_status: 'payment_status',
   customer_id: 'customer_id',
   vehicle_id: 'vehicle_id',
-  staff_id: 'staff_id',
   check_in_time: 'check_in_time'
 } as const
 
 export type OrdersScalarFieldEnum = (typeof OrdersScalarFieldEnum)[keyof typeof OrdersScalarFieldEnum]
+
+
+export const Order_staffScalarFieldEnum = {
+  id: 'id',
+  order_id: 'order_id',
+  staff_id: 'staff_id',
+  assigned_at: 'assigned_at'
+} as const
+
+export type Order_staffScalarFieldEnum = (typeof Order_staffScalarFieldEnum)[keyof typeof Order_staffScalarFieldEnum]
 
 
 export const Order_itemsScalarFieldEnum = {
@@ -193,6 +204,25 @@ export const InvoicesScalarFieldEnum = {
 } as const
 
 export type InvoicesScalarFieldEnum = (typeof InvoicesScalarFieldEnum)[keyof typeof InvoicesScalarFieldEnum]
+
+
+export const Payment_attemptsScalarFieldEnum = {
+  id: 'id',
+  order_id: 'order_id',
+  provider: 'provider',
+  provider_order_id: 'provider_order_id',
+  provider_transaction_id: 'provider_transaction_id',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  idempotency_key: 'idempotency_key',
+  token: 'token',
+  redirect_url: 'redirect_url',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Payment_attemptsScalarFieldEnum = (typeof Payment_attemptsScalarFieldEnum)[keyof typeof Payment_attemptsScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -1,5 +1,5 @@
 import express from "express";
-import cors from "cors";
+import cors, { CorsOptions } from "cors";
 import path from "path";
 import http from "http";
 import "dotenv/config";
@@ -24,7 +24,26 @@ import { setSocketIO } from "./config/socket";
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = new Set(
+  [
+    process.env.ADMIN_FE_URL ?? "http://localhost:5173",
+    process.env.CUSTOMER_FE_URL ?? "http://localhost:5174",
+  ]
+    .map((origin) => origin.replace(/\/$/, "")),
+);
+
+const corsOptions: CorsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin.replace(/\/$/, ""))) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error("Origin is not allowed by CORS"));
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
@@ -54,10 +73,7 @@ const PORT = Number(process.env.PORT) || 5000;
 const httpServer = http.createServer(app);
 
 const io = new Server(httpServer, {
-  cors: {
-    origin: true,
-    credentials: true,
-  },
+  cors: corsOptions,
 });
 
 setSocketIO(io);
@@ -68,7 +84,6 @@ io.on("connection", (socket) => {
   const authSocket = socket as AuthenticatedSocket;
 
   console.log("Socket connected:", socket.id);
-  console.log("User:", authSocket.user);
 
   if (
     authSocket.user?.role === UserRole.ADMIN ||

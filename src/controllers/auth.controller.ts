@@ -156,6 +156,10 @@ export const register = async (
           name: result.newUser.name,
           email: result.newUser.email,
           role: result.newUser.role,
+          customer: {
+            id: result.newCustomer.id,
+            phone: result.newCustomer.phone,
+          },
         },
         customer: {
           id: result.newCustomer.id,
@@ -228,6 +232,14 @@ export const customerLogin = async (
 
     const user = await prisma.users.findUnique({
       where: { email },
+      include: {
+        customer: {
+          select: {
+            id: true,
+            phone: true,
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -269,6 +281,12 @@ export const customerLogin = async (
           name: user.name,
           email: user.email,
           role: user.role,
+          customer: user.customer
+            ? {
+                id: user.customer.id,
+                phone: user.customer.phone,
+              }
+            : null,
         },
       },
       "Customer login successful",

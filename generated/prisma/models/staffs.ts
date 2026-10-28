@@ -232,7 +232,7 @@ export type staffsWhereInput = {
   created_at?: Prisma.DateTimeFilter<"staffs"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"staffs"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"staffs"> | Date | string | null
-  orders?: Prisma.OrdersListRelationFilter
+  order_staff?: Prisma.Order_staffListRelationFilter
 }
 
 export type staffsOrderByWithRelationInput = {
@@ -243,7 +243,7 @@ export type staffsOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
-  orders?: Prisma.ordersOrderByRelationAggregateInput
+  order_staff?: Prisma.order_staffOrderByRelationAggregateInput
 }
 
 export type staffsWhereUniqueInput = Prisma.AtLeast<{
@@ -257,7 +257,7 @@ export type staffsWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"staffs"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"staffs"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"staffs"> | Date | string | null
-  orders?: Prisma.OrdersListRelationFilter
+  order_staff?: Prisma.Order_staffListRelationFilter
 }, "id">
 
 export type staffsOrderByWithAggregationInput = {
@@ -295,7 +295,7 @@ export type staffsCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
-  orders?: Prisma.ordersCreateNestedManyWithoutStaffsInput
+  order_staff?: Prisma.order_staffCreateNestedManyWithoutStaffsInput
 }
 
 export type staffsUncheckedCreateInput = {
@@ -306,7 +306,7 @@ export type staffsUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
-  orders?: Prisma.ordersUncheckedCreateNestedManyWithoutStaffsInput
+  order_staff?: Prisma.order_staffUncheckedCreateNestedManyWithoutStaffsInput
 }
 
 export type staffsUpdateInput = {
@@ -316,7 +316,7 @@ export type staffsUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  orders?: Prisma.ordersUpdateManyWithoutStaffsNestedInput
+  order_staff?: Prisma.order_staffUpdateManyWithoutStaffsNestedInput
 }
 
 export type staffsUncheckedUpdateInput = {
@@ -327,7 +327,7 @@ export type staffsUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  orders?: Prisma.ordersUncheckedUpdateManyWithoutStaffsNestedInput
+  order_staff?: Prisma.order_staffUncheckedUpdateManyWithoutStaffsNestedInput
 }
 
 export type staffsCreateManyInput = {
@@ -397,32 +397,30 @@ export type staffsSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
 }
 
-export type StaffsNullableScalarRelationFilter = {
-  is?: Prisma.staffsWhereInput | null
-  isNot?: Prisma.staffsWhereInput | null
+export type StaffsScalarRelationFilter = {
+  is?: Prisma.staffsWhereInput
+  isNot?: Prisma.staffsWhereInput
 }
 
 export type NullableEnumActiveStatusFieldUpdateOperationsInput = {
   set?: $Enums.ActiveStatus | null
 }
 
-export type staffsCreateNestedOneWithoutOrdersInput = {
-  create?: Prisma.XOR<Prisma.staffsCreateWithoutOrdersInput, Prisma.staffsUncheckedCreateWithoutOrdersInput>
-  connectOrCreate?: Prisma.staffsCreateOrConnectWithoutOrdersInput
+export type staffsCreateNestedOneWithoutOrder_staffInput = {
+  create?: Prisma.XOR<Prisma.staffsCreateWithoutOrder_staffInput, Prisma.staffsUncheckedCreateWithoutOrder_staffInput>
+  connectOrCreate?: Prisma.staffsCreateOrConnectWithoutOrder_staffInput
   connect?: Prisma.staffsWhereUniqueInput
 }
 
-export type staffsUpdateOneWithoutOrdersNestedInput = {
-  create?: Prisma.XOR<Prisma.staffsCreateWithoutOrdersInput, Prisma.staffsUncheckedCreateWithoutOrdersInput>
-  connectOrCreate?: Prisma.staffsCreateOrConnectWithoutOrdersInput
-  upsert?: Prisma.staffsUpsertWithoutOrdersInput
-  disconnect?: Prisma.staffsWhereInput | boolean
-  delete?: Prisma.staffsWhereInput | boolean
+export type staffsUpdateOneRequiredWithoutOrder_staffNestedInput = {
+  create?: Prisma.XOR<Prisma.staffsCreateWithoutOrder_staffInput, Prisma.staffsUncheckedCreateWithoutOrder_staffInput>
+  connectOrCreate?: Prisma.staffsCreateOrConnectWithoutOrder_staffInput
+  upsert?: Prisma.staffsUpsertWithoutOrder_staffInput
   connect?: Prisma.staffsWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.staffsUpdateToOneWithWhereWithoutOrdersInput, Prisma.staffsUpdateWithoutOrdersInput>, Prisma.staffsUncheckedUpdateWithoutOrdersInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.staffsUpdateToOneWithWhereWithoutOrder_staffInput, Prisma.staffsUpdateWithoutOrder_staffInput>, Prisma.staffsUncheckedUpdateWithoutOrder_staffInput>
 }
 
-export type staffsCreateWithoutOrdersInput = {
+export type staffsCreateWithoutOrder_staffInput = {
   name: string
   phone?: string | null
   status?: $Enums.ActiveStatus | null
@@ -431,7 +429,7 @@ export type staffsCreateWithoutOrdersInput = {
   deleted_at?: Date | string | null
 }
 
-export type staffsUncheckedCreateWithoutOrdersInput = {
+export type staffsUncheckedCreateWithoutOrder_staffInput = {
   id?: number
   name: string
   phone?: string | null
@@ -441,23 +439,23 @@ export type staffsUncheckedCreateWithoutOrdersInput = {
   deleted_at?: Date | string | null
 }
 
-export type staffsCreateOrConnectWithoutOrdersInput = {
+export type staffsCreateOrConnectWithoutOrder_staffInput = {
   where: Prisma.staffsWhereUniqueInput
-  create: Prisma.XOR<Prisma.staffsCreateWithoutOrdersInput, Prisma.staffsUncheckedCreateWithoutOrdersInput>
+  create: Prisma.XOR<Prisma.staffsCreateWithoutOrder_staffInput, Prisma.staffsUncheckedCreateWithoutOrder_staffInput>
 }
 
-export type staffsUpsertWithoutOrdersInput = {
-  update: Prisma.XOR<Prisma.staffsUpdateWithoutOrdersInput, Prisma.staffsUncheckedUpdateWithoutOrdersInput>
-  create: Prisma.XOR<Prisma.staffsCreateWithoutOrdersInput, Prisma.staffsUncheckedCreateWithoutOrdersInput>
+export type staffsUpsertWithoutOrder_staffInput = {
+  update: Prisma.XOR<Prisma.staffsUpdateWithoutOrder_staffInput, Prisma.staffsUncheckedUpdateWithoutOrder_staffInput>
+  create: Prisma.XOR<Prisma.staffsCreateWithoutOrder_staffInput, Prisma.staffsUncheckedCreateWithoutOrder_staffInput>
   where?: Prisma.staffsWhereInput
 }
 
-export type staffsUpdateToOneWithWhereWithoutOrdersInput = {
+export type staffsUpdateToOneWithWhereWithoutOrder_staffInput = {
   where?: Prisma.staffsWhereInput
-  data: Prisma.XOR<Prisma.staffsUpdateWithoutOrdersInput, Prisma.staffsUncheckedUpdateWithoutOrdersInput>
+  data: Prisma.XOR<Prisma.staffsUpdateWithoutOrder_staffInput, Prisma.staffsUncheckedUpdateWithoutOrder_staffInput>
 }
 
-export type staffsUpdateWithoutOrdersInput = {
+export type staffsUpdateWithoutOrder_staffInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.NullableEnumActiveStatusFieldUpdateOperationsInput | $Enums.ActiveStatus | null
@@ -466,7 +464,7 @@ export type staffsUpdateWithoutOrdersInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
-export type staffsUncheckedUpdateWithoutOrdersInput = {
+export type staffsUncheckedUpdateWithoutOrder_staffInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -482,11 +480,11 @@ export type staffsUncheckedUpdateWithoutOrdersInput = {
  */
 
 export type StaffsCountOutputType = {
-  orders: number
+  order_staff: number
 }
 
 export type StaffsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  orders?: boolean | StaffsCountOutputTypeCountOrdersArgs
+  order_staff?: boolean | StaffsCountOutputTypeCountOrder_staffArgs
 }
 
 /**
@@ -502,8 +500,8 @@ export type StaffsCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Exten
 /**
  * StaffsCountOutputType without action
  */
-export type StaffsCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.ordersWhereInput
+export type StaffsCountOutputTypeCountOrder_staffArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.order_staffWhereInput
 }
 
 
@@ -515,7 +513,7 @@ export type staffsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
-  orders?: boolean | Prisma.staffs$ordersArgs<ExtArgs>
+  order_staff?: boolean | Prisma.staffs$order_staffArgs<ExtArgs>
   _count?: boolean | Prisma.StaffsCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["staffs"]>
 
@@ -551,7 +549,7 @@ export type staffsSelectScalar = {
 
 export type staffsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "phone" | "status" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["staffs"]>
 export type staffsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  orders?: boolean | Prisma.staffs$ordersArgs<ExtArgs>
+  order_staff?: boolean | Prisma.staffs$order_staffArgs<ExtArgs>
   _count?: boolean | Prisma.StaffsCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type staffsIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -560,7 +558,7 @@ export type staffsIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
 export type $staffsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "staffs"
   objects: {
-    orders: Prisma.$ordersPayload<ExtArgs>[]
+    order_staff: Prisma.$order_staffPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -964,7 +962,7 @@ readonly fields: staffsFieldRefs;
  */
 export interface Prisma__staffsClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  orders<T extends Prisma.staffs$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.staffs$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ordersPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  order_staff<T extends Prisma.staffs$order_staffArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.staffs$order_staffArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$order_staffPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1394,27 +1392,27 @@ export type staffsDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
 }
 
 /**
- * staffs.orders
+ * staffs.order_staff
  */
-export type staffs$ordersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type staffs$order_staffArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the orders
+   * Select specific fields to fetch from the order_staff
    */
-  select?: Prisma.ordersSelect<ExtArgs> | null
+  select?: Prisma.order_staffSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the orders
+   * Omit specific fields from the order_staff
    */
-  omit?: Prisma.ordersOmit<ExtArgs> | null
+  omit?: Prisma.order_staffOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.ordersInclude<ExtArgs> | null
-  where?: Prisma.ordersWhereInput
-  orderBy?: Prisma.ordersOrderByWithRelationInput | Prisma.ordersOrderByWithRelationInput[]
-  cursor?: Prisma.ordersWhereUniqueInput
+  include?: Prisma.order_staffInclude<ExtArgs> | null
+  where?: Prisma.order_staffWhereInput
+  orderBy?: Prisma.order_staffOrderByWithRelationInput | Prisma.order_staffOrderByWithRelationInput[]
+  cursor?: Prisma.order_staffWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.OrdersScalarFieldEnum | Prisma.OrdersScalarFieldEnum[]
+  distinct?: Prisma.Order_staffScalarFieldEnum | Prisma.Order_staffScalarFieldEnum[]
 }
 
 /**
