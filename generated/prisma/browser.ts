@@ -48,6 +48,11 @@ export type services = Prisma.servicesModel
  */
 export type orders = Prisma.ordersModel
 /**
+ * Model order_staff
+ * 
+ */
+export type order_staff = Prisma.order_staffModel
+/**
  * Model order_items
  * 
  */
@@ -62,3 +67,8 @@ export type payments = Prisma.paymentsModel
  * 
  */
 export type invoices = Prisma.invoicesModel
+/**
+ * Model payment_attempts
+ * 
+ */
+export type payment_attempts = Prisma.payment_attemptsModel

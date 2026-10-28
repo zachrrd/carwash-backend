@@ -7,6 +7,7 @@ import {
   createMidtransPayment,
   verifyMidtransPayment,
   midtransNotification,
+  getRevenueSummary,
 } from "../controllers/payment.controller";
 
 import { authenticateToken } from "../middlewares/auth.middleware";
@@ -14,6 +15,12 @@ import { authorizeRoles } from "../middlewares/role.middleware";
 
 const router = Router();
 
+router.get(
+  "/revenue-summary",
+  authenticateToken,
+  authorizeRoles("ADMIN", "CASHIER"),
+  getRevenueSummary,
+);
 
 router.post(
   "/",
@@ -33,7 +40,6 @@ router.post(
 router.post("/notification", midtransNotification);
 
 router.post("/midtrans/notification", midtransNotification);
-
 
 router.get(
   "/",

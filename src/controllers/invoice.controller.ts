@@ -5,6 +5,15 @@ import { AuthRequest } from "../middlewares/auth.middleware";
 import { UserRole } from "../../generated/prisma/enums";
 import PDFDocument from "pdfkit";
 
+const serializeInvoice = <T extends { orders: { order_staff?: Array<{ staffs: unknown }> } }>(invoice: T) => ({
+  ...invoice,
+  orders: {
+    ...invoice.orders,
+    assigned_staffs: invoice.orders.order_staff?.map((assignment) => assignment.staffs) ?? [],
+    staffs: invoice.orders.order_staff?.[0]?.staffs ?? null,
+  },
+});
+
 const parseId = (value: string | string[] | undefined): number | null => {
   if (typeof value !== "string") {
     return null;
@@ -36,7 +45,7 @@ export const getInvoiceById = async (
           include: {
             customers: true,
             vehicles: true,
-            staffs: true,
+            order_staff: { include: { staffs: true } },
             order_items: {
               include: {
                 services: true,
@@ -68,7 +77,7 @@ export const getInvoiceById = async (
       }
     }
 
-    return successResponse(res, invoice, "Invoice retrieved successfully");
+    return successResponse(res, serializeInvoice(invoice), "Invoice retrieved successfully");
   } catch (err) {
     next(err);
   }
@@ -95,7 +104,7 @@ export const downloadInvoicePdf = async (
           include: {
             customers: true,
             vehicles: true,
-            staffs: true,
+            order_staff: { include: { staffs: true } },
             order_items: {
               include: {
                 services: true,
@@ -183,7 +192,8 @@ export const downloadInvoicePdf = async (
 
     doc.text(`Kendaraan: ${order.vehicles.plate_number}`);
 
-    doc.text(`Staff: ${order.staffs?.name ?? "Belum ditentukan"}`);
+    const assignedStaffs = order.order_staff.map(({ staffs }) => staffs.name).join(", ");
+    doc.text(`Staff: ${assignedStaffs || "Belum ditentukan"}`);
 
     doc.moveDown();
 

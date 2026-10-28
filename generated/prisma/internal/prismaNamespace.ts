@@ -403,9 +403,11 @@ export const ModelName = {
   vehicles: 'vehicles',
   services: 'services',
   orders: 'orders',
+  order_staff: 'order_staff',
   order_items: 'order_items',
   payments: 'payments',
-  invoices: 'invoices'
+  invoices: 'invoices',
+  payment_attempts: 'payment_attempts'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -421,7 +423,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "customers" | "staffs" | "vehicles" | "services" | "orders" | "order_items" | "payments" | "invoices"
+    modelProps: "users" | "customers" | "staffs" | "vehicles" | "services" | "orders" | "order_staff" | "order_items" | "payments" | "invoices" | "payment_attempts"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -869,6 +871,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    order_staff: {
+      payload: Prisma.$order_staffPayload<ExtArgs>
+      fields: Prisma.order_staffFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.order_staffFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_staffPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.order_staffFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_staffPayload>
+        }
+        findFirst: {
+          args: Prisma.order_staffFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_staffPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.order_staffFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_staffPayload>
+        }
+        findMany: {
+          args: Prisma.order_staffFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_staffPayload>[]
+        }
+        create: {
+          args: Prisma.order_staffCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_staffPayload>
+        }
+        createMany: {
+          args: Prisma.order_staffCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.order_staffCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_staffPayload>[]
+        }
+        delete: {
+          args: Prisma.order_staffDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_staffPayload>
+        }
+        update: {
+          args: Prisma.order_staffUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_staffPayload>
+        }
+        deleteMany: {
+          args: Prisma.order_staffDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.order_staffUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.order_staffUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_staffPayload>[]
+        }
+        upsert: {
+          args: Prisma.order_staffUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_staffPayload>
+        }
+        aggregate: {
+          args: Prisma.Order_staffAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrder_staff>
+        }
+        groupBy: {
+          args: Prisma.order_staffGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Order_staffGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.order_staffCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Order_staffCountAggregateOutputType> | number
+        }
+      }
+    }
     order_items: {
       payload: Prisma.$order_itemsPayload<ExtArgs>
       fields: Prisma.order_itemsFieldRefs
@@ -1091,6 +1167,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    payment_attempts: {
+      payload: Prisma.$payment_attemptsPayload<ExtArgs>
+      fields: Prisma.payment_attemptsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.payment_attemptsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$payment_attemptsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.payment_attemptsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$payment_attemptsPayload>
+        }
+        findFirst: {
+          args: Prisma.payment_attemptsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$payment_attemptsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.payment_attemptsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$payment_attemptsPayload>
+        }
+        findMany: {
+          args: Prisma.payment_attemptsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$payment_attemptsPayload>[]
+        }
+        create: {
+          args: Prisma.payment_attemptsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$payment_attemptsPayload>
+        }
+        createMany: {
+          args: Prisma.payment_attemptsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.payment_attemptsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$payment_attemptsPayload>[]
+        }
+        delete: {
+          args: Prisma.payment_attemptsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$payment_attemptsPayload>
+        }
+        update: {
+          args: Prisma.payment_attemptsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$payment_attemptsPayload>
+        }
+        deleteMany: {
+          args: Prisma.payment_attemptsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.payment_attemptsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.payment_attemptsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$payment_attemptsPayload>[]
+        }
+        upsert: {
+          args: Prisma.payment_attemptsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$payment_attemptsPayload>
+        }
+        aggregate: {
+          args: Prisma.Payment_attemptsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePayment_attempts>
+        }
+        groupBy: {
+          args: Prisma.payment_attemptsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Payment_attemptsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.payment_attemptsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Payment_attemptsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1206,11 +1356,20 @@ export const OrdersScalarFieldEnum = {
   payment_status: 'payment_status',
   customer_id: 'customer_id',
   vehicle_id: 'vehicle_id',
-  staff_id: 'staff_id',
   check_in_time: 'check_in_time'
 } as const
 
 export type OrdersScalarFieldEnum = (typeof OrdersScalarFieldEnum)[keyof typeof OrdersScalarFieldEnum]
+
+
+export const Order_staffScalarFieldEnum = {
+  id: 'id',
+  order_id: 'order_id',
+  staff_id: 'staff_id',
+  assigned_at: 'assigned_at'
+} as const
+
+export type Order_staffScalarFieldEnum = (typeof Order_staffScalarFieldEnum)[keyof typeof Order_staffScalarFieldEnum]
 
 
 export const Order_itemsScalarFieldEnum = {
@@ -1245,6 +1404,25 @@ export const InvoicesScalarFieldEnum = {
 } as const
 
 export type InvoicesScalarFieldEnum = (typeof InvoicesScalarFieldEnum)[keyof typeof InvoicesScalarFieldEnum]
+
+
+export const Payment_attemptsScalarFieldEnum = {
+  id: 'id',
+  order_id: 'order_id',
+  provider: 'provider',
+  provider_order_id: 'provider_order_id',
+  provider_transaction_id: 'provider_transaction_id',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  idempotency_key: 'idempotency_key',
+  token: 'token',
+  redirect_url: 'redirect_url',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Payment_attemptsScalarFieldEnum = (typeof Payment_attemptsScalarFieldEnum)[keyof typeof Payment_attemptsScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1400,6 +1578,20 @@ export type EnumPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
  * Reference to a field of type 'PaymentMethod[]'
  */
 export type ListEnumPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentMethod[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentAttemptStatus'
+ */
+export type EnumPaymentAttemptStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentAttemptStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentAttemptStatus[]'
+ */
+export type ListEnumPaymentAttemptStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentAttemptStatus[]'>
     
 
 
@@ -1573,9 +1765,11 @@ export type GlobalOmitConfig = {
   vehicles?: Prisma.vehiclesOmit
   services?: Prisma.servicesOmit
   orders?: Prisma.ordersOmit
+  order_staff?: Prisma.order_staffOmit
   order_items?: Prisma.order_itemsOmit
   payments?: Prisma.paymentsOmit
   invoices?: Prisma.invoicesOmit
+  payment_attempts?: Prisma.payment_attemptsOmit
 }
 
 /* Types for Logging */

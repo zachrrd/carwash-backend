@@ -12,6 +12,7 @@ import {
   createOrderByCustomer,
   getMyOrders,
   cancelOrderByCustomer,
+  getActiveOrderByCustomer,
 } from "../controllers/order.controller";
 
 import { authenticateToken } from "../middlewares/auth.middleware";
@@ -20,6 +21,12 @@ import { authorizeRoles } from "../middlewares/role.middleware";
 const router = Router();
 
 // ==================== CUSTOMER ====================
+router.get(
+  "/customer/active",
+  authenticateToken,
+  authorizeRoles("CUSTOMER"),
+  getActiveOrderByCustomer,
+);
 
 router.post(
   "/customer",
