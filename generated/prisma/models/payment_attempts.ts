@@ -47,6 +47,9 @@ export type Payment_attemptsMinAggregateOutputType = {
   amount: runtime.Decimal | null
   currency: string | null
   status: $Enums.PaymentAttemptStatus | null
+  settlement_disposition: $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status: $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at: Date | null
   idempotency_key: string | null
   token: string | null
   redirect_url: string | null
@@ -63,6 +66,9 @@ export type Payment_attemptsMaxAggregateOutputType = {
   amount: runtime.Decimal | null
   currency: string | null
   status: $Enums.PaymentAttemptStatus | null
+  settlement_disposition: $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status: $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at: Date | null
   idempotency_key: string | null
   token: string | null
   redirect_url: string | null
@@ -79,6 +85,9 @@ export type Payment_attemptsCountAggregateOutputType = {
   amount: number
   currency: number
   status: number
+  settlement_disposition: number
+  reconciliation_status: number
+  succeeded_at: number
   idempotency_key: number
   token: number
   redirect_url: number
@@ -109,6 +118,9 @@ export type Payment_attemptsMinAggregateInputType = {
   amount?: true
   currency?: true
   status?: true
+  settlement_disposition?: true
+  reconciliation_status?: true
+  succeeded_at?: true
   idempotency_key?: true
   token?: true
   redirect_url?: true
@@ -125,6 +137,9 @@ export type Payment_attemptsMaxAggregateInputType = {
   amount?: true
   currency?: true
   status?: true
+  settlement_disposition?: true
+  reconciliation_status?: true
+  succeeded_at?: true
   idempotency_key?: true
   token?: true
   redirect_url?: true
@@ -141,6 +156,9 @@ export type Payment_attemptsCountAggregateInputType = {
   amount?: true
   currency?: true
   status?: true
+  settlement_disposition?: true
+  reconciliation_status?: true
+  succeeded_at?: true
   idempotency_key?: true
   token?: true
   redirect_url?: true
@@ -244,6 +262,9 @@ export type Payment_attemptsGroupByOutputType = {
   amount: runtime.Decimal
   currency: string
   status: $Enums.PaymentAttemptStatus
+  settlement_disposition: $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status: $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at: Date | null
   idempotency_key: string
   token: string | null
   redirect_url: string | null
@@ -283,6 +304,9 @@ export type payment_attemptsWhereInput = {
   amount?: Prisma.DecimalFilter<"payment_attempts"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFilter<"payment_attempts"> | string
   status?: Prisma.EnumPaymentAttemptStatusFilter<"payment_attempts"> | $Enums.PaymentAttemptStatus
+  settlement_disposition?: Prisma.EnumPaymentAttemptSettlementDispositionNullableFilter<"payment_attempts"> | $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: Prisma.EnumPaymentAttemptReconciliationStatusNullableFilter<"payment_attempts"> | $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Prisma.DateTimeNullableFilter<"payment_attempts"> | Date | string | null
   idempotency_key?: Prisma.StringFilter<"payment_attempts"> | string
   token?: Prisma.StringNullableFilter<"payment_attempts"> | string | null
   redirect_url?: Prisma.StringNullableFilter<"payment_attempts"> | string | null
@@ -300,6 +324,9 @@ export type payment_attemptsOrderByWithRelationInput = {
   amount?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  settlement_disposition?: Prisma.SortOrderInput | Prisma.SortOrder
+  reconciliation_status?: Prisma.SortOrderInput | Prisma.SortOrder
+  succeeded_at?: Prisma.SortOrderInput | Prisma.SortOrder
   idempotency_key?: Prisma.SortOrder
   token?: Prisma.SortOrderInput | Prisma.SortOrder
   redirect_url?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -321,6 +348,9 @@ export type payment_attemptsWhereUniqueInput = Prisma.AtLeast<{
   amount?: Prisma.DecimalFilter<"payment_attempts"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFilter<"payment_attempts"> | string
   status?: Prisma.EnumPaymentAttemptStatusFilter<"payment_attempts"> | $Enums.PaymentAttemptStatus
+  settlement_disposition?: Prisma.EnumPaymentAttemptSettlementDispositionNullableFilter<"payment_attempts"> | $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: Prisma.EnumPaymentAttemptReconciliationStatusNullableFilter<"payment_attempts"> | $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Prisma.DateTimeNullableFilter<"payment_attempts"> | Date | string | null
   token?: Prisma.StringNullableFilter<"payment_attempts"> | string | null
   redirect_url?: Prisma.StringNullableFilter<"payment_attempts"> | string | null
   created_at?: Prisma.DateTimeFilter<"payment_attempts"> | Date | string
@@ -337,6 +367,9 @@ export type payment_attemptsOrderByWithAggregationInput = {
   amount?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  settlement_disposition?: Prisma.SortOrderInput | Prisma.SortOrder
+  reconciliation_status?: Prisma.SortOrderInput | Prisma.SortOrder
+  succeeded_at?: Prisma.SortOrderInput | Prisma.SortOrder
   idempotency_key?: Prisma.SortOrder
   token?: Prisma.SortOrderInput | Prisma.SortOrder
   redirect_url?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -361,6 +394,9 @@ export type payment_attemptsScalarWhereWithAggregatesInput = {
   amount?: Prisma.DecimalWithAggregatesFilter<"payment_attempts"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringWithAggregatesFilter<"payment_attempts"> | string
   status?: Prisma.EnumPaymentAttemptStatusWithAggregatesFilter<"payment_attempts"> | $Enums.PaymentAttemptStatus
+  settlement_disposition?: Prisma.EnumPaymentAttemptSettlementDispositionNullableWithAggregatesFilter<"payment_attempts"> | $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: Prisma.EnumPaymentAttemptReconciliationStatusNullableWithAggregatesFilter<"payment_attempts"> | $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Prisma.DateTimeNullableWithAggregatesFilter<"payment_attempts"> | Date | string | null
   idempotency_key?: Prisma.StringWithAggregatesFilter<"payment_attempts"> | string
   token?: Prisma.StringNullableWithAggregatesFilter<"payment_attempts"> | string | null
   redirect_url?: Prisma.StringNullableWithAggregatesFilter<"payment_attempts"> | string | null
@@ -375,6 +411,9 @@ export type payment_attemptsCreateInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: string
   status?: $Enums.PaymentAttemptStatus
+  settlement_disposition?: $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Date | string | null
   idempotency_key: string
   token?: string | null
   redirect_url?: string | null
@@ -392,6 +431,9 @@ export type payment_attemptsUncheckedCreateInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: string
   status?: $Enums.PaymentAttemptStatus
+  settlement_disposition?: $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Date | string | null
   idempotency_key: string
   token?: string | null
   redirect_url?: string | null
@@ -406,6 +448,9 @@ export type payment_attemptsUpdateInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPaymentAttemptStatusFieldUpdateOperationsInput | $Enums.PaymentAttemptStatus
+  settlement_disposition?: Prisma.NullableEnumPaymentAttemptSettlementDispositionFieldUpdateOperationsInput | $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: Prisma.NullableEnumPaymentAttemptReconciliationStatusFieldUpdateOperationsInput | $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   redirect_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -423,6 +468,9 @@ export type payment_attemptsUncheckedUpdateInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPaymentAttemptStatusFieldUpdateOperationsInput | $Enums.PaymentAttemptStatus
+  settlement_disposition?: Prisma.NullableEnumPaymentAttemptSettlementDispositionFieldUpdateOperationsInput | $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: Prisma.NullableEnumPaymentAttemptReconciliationStatusFieldUpdateOperationsInput | $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   redirect_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -439,6 +487,9 @@ export type payment_attemptsCreateManyInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: string
   status?: $Enums.PaymentAttemptStatus
+  settlement_disposition?: $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Date | string | null
   idempotency_key: string
   token?: string | null
   redirect_url?: string | null
@@ -453,6 +504,9 @@ export type payment_attemptsUpdateManyMutationInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPaymentAttemptStatusFieldUpdateOperationsInput | $Enums.PaymentAttemptStatus
+  settlement_disposition?: Prisma.NullableEnumPaymentAttemptSettlementDispositionFieldUpdateOperationsInput | $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: Prisma.NullableEnumPaymentAttemptReconciliationStatusFieldUpdateOperationsInput | $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   redirect_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -469,6 +523,9 @@ export type payment_attemptsUncheckedUpdateManyInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPaymentAttemptStatusFieldUpdateOperationsInput | $Enums.PaymentAttemptStatus
+  settlement_disposition?: Prisma.NullableEnumPaymentAttemptSettlementDispositionFieldUpdateOperationsInput | $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: Prisma.NullableEnumPaymentAttemptReconciliationStatusFieldUpdateOperationsInput | $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   redirect_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -495,6 +552,9 @@ export type payment_attemptsCountOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  settlement_disposition?: Prisma.SortOrder
+  reconciliation_status?: Prisma.SortOrder
+  succeeded_at?: Prisma.SortOrder
   idempotency_key?: Prisma.SortOrder
   token?: Prisma.SortOrder
   redirect_url?: Prisma.SortOrder
@@ -517,6 +577,9 @@ export type payment_attemptsMaxOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  settlement_disposition?: Prisma.SortOrder
+  reconciliation_status?: Prisma.SortOrder
+  succeeded_at?: Prisma.SortOrder
   idempotency_key?: Prisma.SortOrder
   token?: Prisma.SortOrder
   redirect_url?: Prisma.SortOrder
@@ -533,6 +596,9 @@ export type payment_attemptsMinOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  settlement_disposition?: Prisma.SortOrder
+  reconciliation_status?: Prisma.SortOrder
+  succeeded_at?: Prisma.SortOrder
   idempotency_key?: Prisma.SortOrder
   token?: Prisma.SortOrder
   redirect_url?: Prisma.SortOrder
@@ -592,6 +658,14 @@ export type EnumPaymentAttemptStatusFieldUpdateOperationsInput = {
   set?: $Enums.PaymentAttemptStatus
 }
 
+export type NullableEnumPaymentAttemptSettlementDispositionFieldUpdateOperationsInput = {
+  set?: $Enums.PaymentAttemptSettlementDisposition | null
+}
+
+export type NullableEnumPaymentAttemptReconciliationStatusFieldUpdateOperationsInput = {
+  set?: $Enums.PaymentAttemptReconciliationStatus | null
+}
+
 export type payment_attemptsCreateWithoutOrdersInput = {
   provider: string
   provider_order_id: string
@@ -599,6 +673,9 @@ export type payment_attemptsCreateWithoutOrdersInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: string
   status?: $Enums.PaymentAttemptStatus
+  settlement_disposition?: $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Date | string | null
   idempotency_key: string
   token?: string | null
   redirect_url?: string | null
@@ -614,6 +691,9 @@ export type payment_attemptsUncheckedCreateWithoutOrdersInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: string
   status?: $Enums.PaymentAttemptStatus
+  settlement_disposition?: $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Date | string | null
   idempotency_key: string
   token?: string | null
   redirect_url?: string | null
@@ -659,6 +739,9 @@ export type payment_attemptsScalarWhereInput = {
   amount?: Prisma.DecimalFilter<"payment_attempts"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFilter<"payment_attempts"> | string
   status?: Prisma.EnumPaymentAttemptStatusFilter<"payment_attempts"> | $Enums.PaymentAttemptStatus
+  settlement_disposition?: Prisma.EnumPaymentAttemptSettlementDispositionNullableFilter<"payment_attempts"> | $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: Prisma.EnumPaymentAttemptReconciliationStatusNullableFilter<"payment_attempts"> | $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Prisma.DateTimeNullableFilter<"payment_attempts"> | Date | string | null
   idempotency_key?: Prisma.StringFilter<"payment_attempts"> | string
   token?: Prisma.StringNullableFilter<"payment_attempts"> | string | null
   redirect_url?: Prisma.StringNullableFilter<"payment_attempts"> | string | null
@@ -674,6 +757,9 @@ export type payment_attemptsCreateManyOrdersInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: string
   status?: $Enums.PaymentAttemptStatus
+  settlement_disposition?: $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Date | string | null
   idempotency_key: string
   token?: string | null
   redirect_url?: string | null
@@ -688,6 +774,9 @@ export type payment_attemptsUpdateWithoutOrdersInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPaymentAttemptStatusFieldUpdateOperationsInput | $Enums.PaymentAttemptStatus
+  settlement_disposition?: Prisma.NullableEnumPaymentAttemptSettlementDispositionFieldUpdateOperationsInput | $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: Prisma.NullableEnumPaymentAttemptReconciliationStatusFieldUpdateOperationsInput | $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   redirect_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -703,6 +792,9 @@ export type payment_attemptsUncheckedUpdateWithoutOrdersInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPaymentAttemptStatusFieldUpdateOperationsInput | $Enums.PaymentAttemptStatus
+  settlement_disposition?: Prisma.NullableEnumPaymentAttemptSettlementDispositionFieldUpdateOperationsInput | $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: Prisma.NullableEnumPaymentAttemptReconciliationStatusFieldUpdateOperationsInput | $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   redirect_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -718,6 +810,9 @@ export type payment_attemptsUncheckedUpdateManyWithoutOrdersInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPaymentAttemptStatusFieldUpdateOperationsInput | $Enums.PaymentAttemptStatus
+  settlement_disposition?: Prisma.NullableEnumPaymentAttemptSettlementDispositionFieldUpdateOperationsInput | $Enums.PaymentAttemptSettlementDisposition | null
+  reconciliation_status?: Prisma.NullableEnumPaymentAttemptReconciliationStatusFieldUpdateOperationsInput | $Enums.PaymentAttemptReconciliationStatus | null
+  succeeded_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   redirect_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -736,6 +831,9 @@ export type payment_attemptsSelect<ExtArgs extends runtime.Types.Extensions.Inte
   amount?: boolean
   currency?: boolean
   status?: boolean
+  settlement_disposition?: boolean
+  reconciliation_status?: boolean
+  succeeded_at?: boolean
   idempotency_key?: boolean
   token?: boolean
   redirect_url?: boolean
@@ -753,6 +851,9 @@ export type payment_attemptsSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   amount?: boolean
   currency?: boolean
   status?: boolean
+  settlement_disposition?: boolean
+  reconciliation_status?: boolean
+  succeeded_at?: boolean
   idempotency_key?: boolean
   token?: boolean
   redirect_url?: boolean
@@ -770,6 +871,9 @@ export type payment_attemptsSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   amount?: boolean
   currency?: boolean
   status?: boolean
+  settlement_disposition?: boolean
+  reconciliation_status?: boolean
+  succeeded_at?: boolean
   idempotency_key?: boolean
   token?: boolean
   redirect_url?: boolean
@@ -787,6 +891,9 @@ export type payment_attemptsSelectScalar = {
   amount?: boolean
   currency?: boolean
   status?: boolean
+  settlement_disposition?: boolean
+  reconciliation_status?: boolean
+  succeeded_at?: boolean
   idempotency_key?: boolean
   token?: boolean
   redirect_url?: boolean
@@ -794,7 +901,7 @@ export type payment_attemptsSelectScalar = {
   updated_at?: boolean
 }
 
-export type payment_attemptsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "order_id" | "provider" | "provider_order_id" | "provider_transaction_id" | "amount" | "currency" | "status" | "idempotency_key" | "token" | "redirect_url" | "created_at" | "updated_at", ExtArgs["result"]["payment_attempts"]>
+export type payment_attemptsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "order_id" | "provider" | "provider_order_id" | "provider_transaction_id" | "amount" | "currency" | "status" | "settlement_disposition" | "reconciliation_status" | "succeeded_at" | "idempotency_key" | "token" | "redirect_url" | "created_at" | "updated_at", ExtArgs["result"]["payment_attempts"]>
 export type payment_attemptsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orders?: boolean | Prisma.ordersDefaultArgs<ExtArgs>
 }
@@ -819,6 +926,9 @@ export type $payment_attemptsPayload<ExtArgs extends runtime.Types.Extensions.In
     amount: runtime.Decimal
     currency: string
     status: $Enums.PaymentAttemptStatus
+    settlement_disposition: $Enums.PaymentAttemptSettlementDisposition | null
+    reconciliation_status: $Enums.PaymentAttemptReconciliationStatus | null
+    succeeded_at: Date | null
     idempotency_key: string
     token: string | null
     redirect_url: string | null
@@ -1256,6 +1366,9 @@ export interface payment_attemptsFieldRefs {
   readonly amount: Prisma.FieldRef<"payment_attempts", 'Decimal'>
   readonly currency: Prisma.FieldRef<"payment_attempts", 'String'>
   readonly status: Prisma.FieldRef<"payment_attempts", 'PaymentAttemptStatus'>
+  readonly settlement_disposition: Prisma.FieldRef<"payment_attempts", 'PaymentAttemptSettlementDisposition'>
+  readonly reconciliation_status: Prisma.FieldRef<"payment_attempts", 'PaymentAttemptReconciliationStatus'>
+  readonly succeeded_at: Prisma.FieldRef<"payment_attempts", 'DateTime'>
   readonly idempotency_key: Prisma.FieldRef<"payment_attempts", 'String'>
   readonly token: Prisma.FieldRef<"payment_attempts", 'String'>
   readonly redirect_url: Prisma.FieldRef<"payment_attempts", 'String'>

@@ -66,3 +66,19 @@ export const PaymentAttemptStatus = {
 } as const
 
 export type PaymentAttemptStatus = (typeof PaymentAttemptStatus)[keyof typeof PaymentAttemptStatus]
+
+
+export const PaymentAttemptSettlementDisposition = {
+  PRIMARY: 'PRIMARY',
+  DUPLICATE_RECONCILIATION_REQUIRED: 'DUPLICATE_RECONCILIATION_REQUIRED'
+} as const
+
+export type PaymentAttemptSettlementDisposition = (typeof PaymentAttemptSettlementDisposition)[keyof typeof PaymentAttemptSettlementDisposition]
+
+
+export const PaymentAttemptReconciliationStatus = {
+  REQUIRED: 'REQUIRED',
+  RESOLVED: 'RESOLVED'
+} as const
+
+export type PaymentAttemptReconciliationStatus = (typeof PaymentAttemptReconciliationStatus)[keyof typeof PaymentAttemptReconciliationStatus]

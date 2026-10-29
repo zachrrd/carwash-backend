@@ -1415,6 +1415,9 @@ export const Payment_attemptsScalarFieldEnum = {
   amount: 'amount',
   currency: 'currency',
   status: 'status',
+  settlement_disposition: 'settlement_disposition',
+  reconciliation_status: 'reconciliation_status',
+  succeeded_at: 'succeeded_at',
   idempotency_key: 'idempotency_key',
   token: 'token',
   redirect_url: 'redirect_url',
@@ -1592,6 +1595,34 @@ export type EnumPaymentAttemptStatusFieldRefInput<$PrismaModel> = FieldRefInputT
  * Reference to a field of type 'PaymentAttemptStatus[]'
  */
 export type ListEnumPaymentAttemptStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentAttemptStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentAttemptSettlementDisposition'
+ */
+export type EnumPaymentAttemptSettlementDispositionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentAttemptSettlementDisposition'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentAttemptSettlementDisposition[]'
+ */
+export type ListEnumPaymentAttemptSettlementDispositionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentAttemptSettlementDisposition[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentAttemptReconciliationStatus'
+ */
+export type EnumPaymentAttemptReconciliationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentAttemptReconciliationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentAttemptReconciliationStatus[]'
+ */
+export type ListEnumPaymentAttemptReconciliationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentAttemptReconciliationStatus[]'>
     
 
 

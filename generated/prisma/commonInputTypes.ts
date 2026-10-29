@@ -335,6 +335,20 @@ export type EnumPaymentAttemptStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumPaymentAttemptStatusFilter<$PrismaModel> | $Enums.PaymentAttemptStatus
 }
 
+export type EnumPaymentAttemptSettlementDispositionNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.PaymentAttemptSettlementDisposition | Prisma.EnumPaymentAttemptSettlementDispositionFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PaymentAttemptSettlementDisposition[] | Prisma.ListEnumPaymentAttemptSettlementDispositionFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PaymentAttemptSettlementDisposition[] | Prisma.ListEnumPaymentAttemptSettlementDispositionFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPaymentAttemptSettlementDispositionNullableFilter<$PrismaModel> | $Enums.PaymentAttemptSettlementDisposition | null
+}
+
+export type EnumPaymentAttemptReconciliationStatusNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.PaymentAttemptReconciliationStatus | Prisma.EnumPaymentAttemptReconciliationStatusFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PaymentAttemptReconciliationStatus[] | Prisma.ListEnumPaymentAttemptReconciliationStatusFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PaymentAttemptReconciliationStatus[] | Prisma.ListEnumPaymentAttemptReconciliationStatusFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPaymentAttemptReconciliationStatusNullableFilter<$PrismaModel> | $Enums.PaymentAttemptReconciliationStatus | null
+}
+
 export type EnumPaymentAttemptStatusWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.PaymentAttemptStatus | Prisma.EnumPaymentAttemptStatusFieldRefInput<$PrismaModel>
   in?: $Enums.PaymentAttemptStatus[] | Prisma.ListEnumPaymentAttemptStatusFieldRefInput<$PrismaModel>
@@ -343,6 +357,26 @@ export type EnumPaymentAttemptStatusWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumPaymentAttemptStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumPaymentAttemptStatusFilter<$PrismaModel>
+}
+
+export type EnumPaymentAttemptSettlementDispositionNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PaymentAttemptSettlementDisposition | Prisma.EnumPaymentAttemptSettlementDispositionFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PaymentAttemptSettlementDisposition[] | Prisma.ListEnumPaymentAttemptSettlementDispositionFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PaymentAttemptSettlementDisposition[] | Prisma.ListEnumPaymentAttemptSettlementDispositionFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPaymentAttemptSettlementDispositionNullableWithAggregatesFilter<$PrismaModel> | $Enums.PaymentAttemptSettlementDisposition | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPaymentAttemptSettlementDispositionNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPaymentAttemptSettlementDispositionNullableFilter<$PrismaModel>
+}
+
+export type EnumPaymentAttemptReconciliationStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PaymentAttemptReconciliationStatus | Prisma.EnumPaymentAttemptReconciliationStatusFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PaymentAttemptReconciliationStatus[] | Prisma.ListEnumPaymentAttemptReconciliationStatusFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PaymentAttemptReconciliationStatus[] | Prisma.ListEnumPaymentAttemptReconciliationStatusFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPaymentAttemptReconciliationStatusNullableWithAggregatesFilter<$PrismaModel> | $Enums.PaymentAttemptReconciliationStatus | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPaymentAttemptReconciliationStatusNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPaymentAttemptReconciliationStatusNullableFilter<$PrismaModel>
 }
 
 export type NestedIntFilter<$PrismaModel = never> = {
@@ -679,6 +713,20 @@ export type NestedEnumPaymentAttemptStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumPaymentAttemptStatusFilter<$PrismaModel> | $Enums.PaymentAttemptStatus
 }
 
+export type NestedEnumPaymentAttemptSettlementDispositionNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.PaymentAttemptSettlementDisposition | Prisma.EnumPaymentAttemptSettlementDispositionFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PaymentAttemptSettlementDisposition[] | Prisma.ListEnumPaymentAttemptSettlementDispositionFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PaymentAttemptSettlementDisposition[] | Prisma.ListEnumPaymentAttemptSettlementDispositionFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPaymentAttemptSettlementDispositionNullableFilter<$PrismaModel> | $Enums.PaymentAttemptSettlementDisposition | null
+}
+
+export type NestedEnumPaymentAttemptReconciliationStatusNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.PaymentAttemptReconciliationStatus | Prisma.EnumPaymentAttemptReconciliationStatusFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PaymentAttemptReconciliationStatus[] | Prisma.ListEnumPaymentAttemptReconciliationStatusFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PaymentAttemptReconciliationStatus[] | Prisma.ListEnumPaymentAttemptReconciliationStatusFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPaymentAttemptReconciliationStatusNullableFilter<$PrismaModel> | $Enums.PaymentAttemptReconciliationStatus | null
+}
+
 export type NestedEnumPaymentAttemptStatusWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.PaymentAttemptStatus | Prisma.EnumPaymentAttemptStatusFieldRefInput<$PrismaModel>
   in?: $Enums.PaymentAttemptStatus[] | Prisma.ListEnumPaymentAttemptStatusFieldRefInput<$PrismaModel>
@@ -687,6 +735,26 @@ export type NestedEnumPaymentAttemptStatusWithAggregatesFilter<$PrismaModel = ne
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumPaymentAttemptStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumPaymentAttemptStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumPaymentAttemptSettlementDispositionNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PaymentAttemptSettlementDisposition | Prisma.EnumPaymentAttemptSettlementDispositionFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PaymentAttemptSettlementDisposition[] | Prisma.ListEnumPaymentAttemptSettlementDispositionFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PaymentAttemptSettlementDisposition[] | Prisma.ListEnumPaymentAttemptSettlementDispositionFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPaymentAttemptSettlementDispositionNullableWithAggregatesFilter<$PrismaModel> | $Enums.PaymentAttemptSettlementDisposition | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPaymentAttemptSettlementDispositionNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPaymentAttemptSettlementDispositionNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumPaymentAttemptReconciliationStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PaymentAttemptReconciliationStatus | Prisma.EnumPaymentAttemptReconciliationStatusFieldRefInput<$PrismaModel> | null
+  in?: $Enums.PaymentAttemptReconciliationStatus[] | Prisma.ListEnumPaymentAttemptReconciliationStatusFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.PaymentAttemptReconciliationStatus[] | Prisma.ListEnumPaymentAttemptReconciliationStatusFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPaymentAttemptReconciliationStatusNullableWithAggregatesFilter<$PrismaModel> | $Enums.PaymentAttemptReconciliationStatus | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPaymentAttemptReconciliationStatusNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPaymentAttemptReconciliationStatusNullableFilter<$PrismaModel>
 }
 
 
