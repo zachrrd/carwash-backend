@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "build": "prisma generate && tsc --noEmit",
+    "start": "tsx src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -25,6 +27,7 @@
     "pdfkit": "^0.20.2",
     "pg": "^8.22.0",
     "socket.io": "^4.8.3",
+    "tsx": "^4.23.8",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -37,7 +40,6 @@
     "@types/pdfkit": "^0.17.6",
     "prisma": "^7.9.1",
     "ts-node-dev": "^2.0.0",
-    "tsx": "^4.23.8",
     "typescript": "^7.0.2"
   }
 }
